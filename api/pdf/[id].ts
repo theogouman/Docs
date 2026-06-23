@@ -14,6 +14,8 @@
 
 export const config = { maxDuration: 60 }
 
+import { authConfigured, sessionEmail } from '../../server/auth'
+
 const SPACE_ID = '044d7f69-a713-4bfa-a4e4-53a306821dcf'
 const NOTION_VERSION = '2022-06-28'
 const CACHE_TTL_MS = 45 * 60 * 1000
@@ -121,6 +123,10 @@ export default async function handler(req: Json, res: Json) {
     const rawId = Array.isArray(q.id) ? q.id[0] : q.id
     if (!rawId) return sendError(res, 400, 'Identifiant de document manquant.')
 
+    // Accès aux PDF réservé aux utilisateurs connectés (si l'auth est active).
+    const locked = authConfigured()
+    if (locked && !sessionEmail(req)) return sendError(res, 401, 'Authentification requise.')
+
     const url = await resolveSigned(rawId)
     if (!url) return sendError(res, 502, 'PDF introuvable sur Notion (page publique ?).')
 
@@ -131,8 +137,8 @@ export default async function handler(req: Json, res: Json) {
     if (!proxy && !download) {
       res.statusCode = 302
       res.setHeader('Location', url)
-      // Cache CDN (Vercel) : ré-ouvertures quasi instantanées.
-      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=1800')
+      // Ressource privée si l'auth est active -> pas de cache CDN partagé.
+      res.setHeader('Cache-Control', locked ? 'private, no-store' : 'public, max-age=0, s-maxage=1800')
       res.setHeader('X-Robots-Tag', 'noindex, nofollow')
       res.end()
       return

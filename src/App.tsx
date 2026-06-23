@@ -4,7 +4,8 @@ import rawCategories from './data/categories.json'
 import type { Category, DocItem, NotionColor, ViewMode } from './lib/types'
 import { TypeColorContext } from './lib/categories'
 import { normalize } from './lib/format'
-import PasswordGate from './components/PasswordGate'
+import { logAction } from './lib/log'
+import AuthGate from './components/AuthGate'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import TypeFilters from './components/TypeFilters'
@@ -128,8 +129,14 @@ export default function App() {
     })
   }
 
+  // Ouvrir le détail = consulter le document -> on journalise une « Ouverture ».
+  function openDetail(doc: DocItem) {
+    logAction('Ouverture', doc.name)
+    setDetail(doc)
+  }
+
   return (
-    <PasswordGate>
+    <AuthGate>
       <TypeColorContext.Provider value={colorFor}>
         <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
           <Header />
@@ -168,7 +175,7 @@ export default function App() {
                   </p>
                 </div>
               ) : view === 'table' ? (
-                <DocumentTable docs={flat} onOpenDetail={setDetail} />
+                <DocumentTable docs={flat} onOpenDetail={openDetail} />
               ) : (
                 <div className="space-y-4">
                   {groups.map((group) => (
@@ -180,7 +187,7 @@ export default function App() {
                       zipName={`fenouillet-${slug(group.type) || 'categorie'}.zip`}
                       open={isOpen(group.type)}
                       onToggle={() => toggleCollapse(group.type)}
-                      onOpenDetail={setDetail}
+                      onOpenDetail={openDetail}
                       collapsible={collapsible}
                     />
                   ))}
@@ -215,6 +222,6 @@ export default function App() {
           <DetailPanel doc={detail} onClose={() => setDetail(null)} />
         </div>
       </TypeColorContext.Provider>
-    </PasswordGate>
+    </AuthGate>
   )
 }

@@ -186,3 +186,25 @@ body {
     transition: none !important;
   }
 }
+
+/* ---- Dropdown open/close (placeholder, à remplacer par le CSS fourni) ---- */
+.t-dd {
+  opacity: 0;
+  transform: scale(0.96) translateY(-4px);
+  transform-origin: top;
+  pointer-events: none;
+  transition:
+    opacity var(--t-dur-quick) var(--t-ease),
+    transform var(--t-dur-quick) var(--t-ease);
+}
+.t-dd.is-open {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-dd {
+    transition: none !important;
+  }
+}

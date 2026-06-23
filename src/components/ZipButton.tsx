@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from 'react'
 import { Download, LoaderCircle } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { downloadDocsAsZip } from '../lib/download'
+import { logAction } from '../lib/log'
 
 interface Props {
   docs: DocItem[]
@@ -37,6 +38,7 @@ export default function ZipButton({
     setBusy(true)
     setError(false)
     setProgress({ done: 0, total: docs.length })
+    logAction('Téléchargement', `Archive : ${zipName} (${docs.length} fichiers)`)
     try {
       await downloadDocsAsZip(docs, zipName, {
         foldersByType,

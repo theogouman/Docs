@@ -1,6 +1,7 @@
 import { Download, ExternalLink } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { pdfUrl, pdfDownloadUrl } from '../lib/pdf'
+import { logAction } from '../lib/log'
 
 interface Props {
   doc: DocItem
@@ -17,6 +18,15 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
   const url = pdfUrl(doc)
   const dl = pdfDownloadUrl(doc)
 
+  const onOpen = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation()
+    logAction('Ouverture', doc.name)
+  }
+  const onDownload = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation()
+    logAction('Téléchargement', doc.name)
+  }
+
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-1">
@@ -24,7 +34,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={onOpen}
           aria-label={`Ouvrir le PDF : ${doc.name}`}
           title="Ouvrir"
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
@@ -33,7 +43,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         </a>
         <a
           href={dl}
-          onClick={(e) => e.stopPropagation()}
+          onClick={onDownload}
           aria-label={`Télécharger le PDF : ${doc.name}`}
           title="Télécharger"
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
@@ -51,7 +61,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
+        onClick={onOpen}
         aria-label={`Ouvrir le PDF : ${doc.name}`}
         className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-900 font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white ${pad}`}
       >
@@ -60,7 +70,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
       </a>
       <a
         href={dl}
-        onClick={(e) => e.stopPropagation()}
+        onClick={onDownload}
         aria-label={`Télécharger le PDF : ${doc.name}`}
         className={`inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${pad}`}
       >
