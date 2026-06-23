@@ -12,7 +12,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
     <div
       className="no-scrollbar -mx-4 flex items-center gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
       role="group"
-      aria-label="Filtrer par type"
+      aria-label="Catégories (cliquer pour ouvrir)"
     >
       {TYPE_ORDER.map((type) => {
         const isOn = selected.has(type)
@@ -50,7 +50,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
           onClick={onClear}
           className="ml-1 shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-gray-500 underline-offset-2 transition hover:text-gray-900 hover:underline"
         >
-          Tout effacer
+          Tout replier
         </button>
       )}
     </div>

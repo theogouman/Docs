@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Police SF Pro Display auto-hébergée — Regular (titres en gras, textes) */
+/* Police SF Pro Display auto-hébergée : Regular (textes) et Bold (titres) */
 @font-face {
   font-family: 'SF Pro Display';
   font-style: normal;

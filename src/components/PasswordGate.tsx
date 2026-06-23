@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 
 /**
- * Porte d'accès par mot de passe — DISSUASION CÔTÉ CLIENT UNIQUEMENT.
+ * Porte d'accès par mot de passe (DISSUASION CÔTÉ CLIENT UNIQUEMENT).
  * Ce n'est PAS une sécurité forte : le mot de passe est présent dans le
  * bundle JavaScript livré au navigateur. Pour un vrai contrôle d'accès,
  * placer le site derrière une authentification d'hébergeur (voir README).
@@ -75,7 +75,7 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
           Accéder au dossier
         </button>
         <p className="mt-4 text-xs leading-relaxed text-gray-400">
-          Protection de dissuasion uniquement — ne remplace pas une
+          Protection de dissuasion uniquement, ne remplace pas une
           authentification d'hébergeur.
         </p>
       </form>

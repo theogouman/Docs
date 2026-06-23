@@ -1,19 +1,12 @@
 import { useMemo, useState } from 'react'
 import rawDocuments from './data/documents.json'
-import {
-  TYPE_ORDER,
-  type DocItem,
-  type DocType,
-  type SortMode,
-  type ViewMode,
-} from './lib/types'
+import { TYPE_ORDER, type DocItem, type DocType, type ViewMode } from './lib/types'
 import { normalize } from './lib/format'
 import PasswordGate from './components/PasswordGate'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import TypeFilters from './components/TypeFilters'
 import Toolbar from './components/Toolbar'
-import DocumentCard from './components/DocumentCard'
 import DocumentTable from './components/DocumentTable'
 import DetailPanel from './components/DetailPanel'
 import ZipButton from './components/ZipButton'
@@ -24,8 +17,7 @@ const TOTAL = DOCUMENTS.length
 
 const byName = (a: DocItem, b: DocItem) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
 
-const slug = (s: string) =>
-  normalize(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+const slug = (s: string) => normalize(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 // Compteurs par type, calculés une fois sur l'ensemble du corpus.
 const TYPE_COUNTS = TYPE_ORDER.reduce(
@@ -38,46 +30,55 @@ const TYPE_COUNTS = TYPE_ORDER.reduce(
 
 export default function App() {
   const [query, setQuery] = useState('')
-  const [selectedTypes, setSelectedTypes] = useState<Set<DocType>>(new Set())
-  const [sort, setSort] = useState<SortMode>('type')
+  const [openCats, setOpenCats] = useState<Set<DocType>>(new Set())
   const [view, setView] = useState<ViewMode>('cards')
   const [detail, setDetail] = useState<DocItem | null>(null)
 
+  const searching = normalize(query).length > 0
+
   const filtered = useMemo(() => {
     const q = normalize(query)
-    return DOCUMENTS.filter((doc) => {
-      if (selectedTypes.size > 0 && !selectedTypes.has(doc.type)) return false
-      if (!q) return true
-      const haystack = normalize(`${doc.name} ${doc.summary}`)
-      return haystack.includes(q)
-    })
-  }, [query, selectedTypes])
+    if (!q) return DOCUMENTS
+    return DOCUMENTS.filter((doc) => normalize(`${doc.name} ${doc.summary}`).includes(q))
+  }, [query])
 
-  // Groupes ordonnés (tri par type) — chaque groupe trié par nom A→Z.
-  const groups = useMemo(() => {
-    if (sort !== 'type') return null
-    return TYPE_ORDER.map((type) => ({
-      type,
-      docs: filtered.filter((d) => d.type === type).sort(byName),
-    })).filter((g) => g.docs.length > 0)
-  }, [filtered, sort])
+  // Groupes par type (ordre fixe), chacun trié par nom A→Z.
+  const groups = useMemo(
+    () =>
+      TYPE_ORDER.map((type) => ({
+        type,
+        docs: filtered.filter((d) => d.type === type).sort(byName),
+      })).filter((g) => g.docs.length > 0),
+    [filtered],
+  )
 
-  const flat = useMemo(() => [...filtered].sort(byName), [filtered])
+  // Vue tableau : liste à plat, ordonnée par type puis par nom.
+  const flat = useMemo(() => groups.flatMap((g) => g.docs), [groups])
 
-  function toggleType(type: DocType) {
-    setSelectedTypes((prev) => {
+  // Une catégorie est ouverte si on l'a ouverte (tag/chevron), ou pendant une
+  // recherche (on déplie tout ce qui contient des résultats).
+  const isOpen = (type: DocType) => searching || openCats.has(type)
+
+  function toggleCat(type: DocType) {
+    const willOpen = !openCats.has(type)
+    setOpenCats((prev) => {
       const next = new Set(prev)
       next.has(type) ? next.delete(type) : next.add(type)
       return next
     })
+    if (willOpen) {
+      setTimeout(() => {
+        document
+          .getElementById(`cat-section-${type}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 60)
+    }
   }
 
-  const renderCards = (docs: DocItem[]) => (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {docs.map((doc, i) => (
-        <DocumentCard key={doc.id} doc={doc} index={i} onOpenDetail={setDetail} />
-      ))}
-    </div>
+  const openTypes = useMemo(
+    () => new Set(TYPE_ORDER.filter((t) => isOpen(t))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [openCats, searching],
   )
 
   return (
@@ -90,15 +91,13 @@ export default function App() {
             <SearchBar value={query} onChange={setQuery} />
             <TypeFilters
               counts={TYPE_COUNTS}
-              selected={selectedTypes}
-              onToggle={toggleType}
-              onClear={() => setSelectedTypes(new Set())}
+              selected={openTypes}
+              onToggle={toggleCat}
+              onClear={() => setOpenCats(new Set())}
             />
             <Toolbar
               count={filtered.length}
               total={TOTAL}
-              sort={sort}
-              onSort={setSort}
               view={view}
               onView={setView}
               leadingAction={
@@ -106,6 +105,7 @@ export default function App() {
                   docs={DOCUMENTS}
                   zipName="dossier-fenouillet.zip"
                   label="Tout télécharger"
+                  foldersByType
                   className="bg-gray-900 text-white hover:bg-gray-700"
                 />
               }
@@ -121,7 +121,7 @@ export default function App() {
               </div>
             ) : view === 'table' ? (
               <DocumentTable docs={flat} onOpenDetail={setDetail} />
-            ) : groups ? (
+            ) : (
               <div className="space-y-4">
                 {groups.map((group) => (
                   <CategorySection
@@ -129,18 +129,18 @@ export default function App() {
                     type={group.type}
                     docs={group.docs}
                     zipName={`fenouillet-${slug(group.type)}.zip`}
+                    open={isOpen(group.type)}
+                    onToggle={() => toggleCat(group.type)}
                     onOpenDetail={setDetail}
                   />
                 ))}
               </div>
-            ) : (
-              renderCards(flat)
             )}
           </div>
 
           <footer className="mt-12 border-t border-gray-200 pt-6 text-xs leading-relaxed text-gray-400">
             <p>
-              Dossier confidentiel — données personnelles de tiers. Diffusion
+              Dossier confidentiel. Données personnelles de tiers, diffusion
               restreinte au notaire, aux associés et à l'acquéreur.
             </p>
           </footer>

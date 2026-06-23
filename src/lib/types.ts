@@ -20,7 +20,6 @@ export interface DocItem {
   summary: string
 }
 
-export type SortMode = 'type' | 'name'
 export type ViewMode = 'cards' | 'table'
 
 /**

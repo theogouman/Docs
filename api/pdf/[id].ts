@@ -1,21 +1,27 @@
-// api/pdf/[id].ts — Résout et sert un PDF hébergé sur Notion, à la volée.
+// api/pdf/[id].ts — Résout l'URL du PDF Notion et la sert le plus vite possible.
 //
-// Deux modes, dans cet ordre :
-//   1. NOTION_TOKEN défini  -> API officielle Notion (le plus fiable).
-//   2. sinon                -> endpoints publics de Notion (la page est
-//                              publique : « même sans API »).
+// Résolution (dans l'ordre) :
+//   1. NOTION_TOKEN défini -> API officielle Notion.
+//   2. sinon               -> endpoints publics (page publique, « sans API »).
+// Les URL signées sont mises en cache mémoire (instance chaude) ~45 min.
 //
-// La réponse est streamée depuis la même origine (/api/...), ce qui permet
-// l'aperçu en iframe, l'ouverture, le téléchargement et le ZIP côté client
-// sans aucun souci de CORS, et sans la limite de taille des réponses
-// bufferisées (le gros acte de ~19 Mo passe sans problème).
+// Modes de service :
+//   - défaut  -> redirection 302 vers l'URL signée S3 (lecture DIRECTE par le
+//                navigateur, sans repasser par la fonction : c'est le plus
+//                rapide pour « Ouvrir » et l'aperçu). Mis en cache CDN.
+//   - ?proxy=1 -> streame les octets en même origine (pour le ZIP côté client).
+//   - ?dl=1    -> streame en pièce jointe avec un nom de fichier lisible.
 
 export const config = { maxDuration: 60 }
 
 const SPACE_ID = '044d7f69-a713-4bfa-a4e4-53a306821dcf'
 const NOTION_VERSION = '2022-06-28'
+const CACHE_TTL_MS = 45 * 60 * 1000
 
 type Json = any
+
+// Cache mémoire des URL signées (persiste tant que l'instance reste chaude).
+const urlCache = new Map<string, { url: string; exp: number }>()
 
 /** Remet les tirets d'un UUID Notion (8-4-4-4-12). */
 function dashify(id: string): string {
@@ -88,6 +94,21 @@ async function resolveViaPublic(pageId: string): Promise<string | null> {
   return signed.signedUrls?.[0] ?? signed.signedGetUrls?.[0] ?? rawUrl
 }
 
+/** Résout (avec cache) l'URL signée d'un document. */
+async function resolveSigned(pageId: string): Promise<string | null> {
+  const key = dashify(pageId)
+  const now = Date.now()
+  const hit = urlCache.get(key)
+  if (hit && hit.exp > now) return hit.url
+
+  const token = process.env.NOTION_TOKEN
+  let url: string | null = null
+  if (token) url = await resolveViaToken(pageId, token)
+  if (!url) url = await resolveViaPublic(pageId)
+  if (url) urlCache.set(key, { url, exp: now + CACHE_TTL_MS })
+  return url
+}
+
 function sendError(res: Json, code: number, message: string) {
   res.statusCode = code
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -100,18 +121,28 @@ export default async function handler(req: Json, res: Json) {
     const rawId = Array.isArray(q.id) ? q.id[0] : q.id
     if (!rawId) return sendError(res, 400, 'Identifiant de document manquant.')
 
-    const token = process.env.NOTION_TOKEN
-    let url: string | null = null
-    if (token) url = await resolveViaToken(rawId, token)
-    if (!url) url = await resolveViaPublic(rawId)
+    const url = await resolveSigned(rawId)
     if (!url) return sendError(res, 502, 'PDF introuvable sur Notion (page publique ?).')
 
+    const proxy = q.proxy === '1' || q.proxy === 'true'
+    const download = q.dl === '1' || q.download === '1' || q.download === 'true'
+
+    // Chemin rapide : on redirige vers S3, le navigateur lit en direct.
+    if (!proxy && !download) {
+      res.statusCode = 302
+      res.setHeader('Location', url)
+      // Cache CDN (Vercel) : ré-ouvertures quasi instantanées.
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=1800')
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow')
+      res.end()
+      return
+    }
+
+    // Proxy (ZIP même origine) ou téléchargement avec nom de fichier propre.
     const fileRes = await fetch(url)
     if (!fileRes.ok || !fileRes.body) {
       return sendError(res, 502, `Notion a renvoyé le statut ${fileRes.status}.`)
     }
-
-    const download = q.download === '1' || q.download === 'true'
     const filename = (Array.isArray(q.name) ? q.name[0] : q.name) || 'document.pdf'
 
     res.statusCode = 200

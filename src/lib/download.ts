@@ -1,5 +1,5 @@
 import { downloadZip } from 'client-zip'
-import { pdfUrl } from './pdf'
+import { pdfProxyUrl } from './pdf'
 import type { DocItem } from './types'
 
 function triggerBlobDownload(blob: Blob, filename: string) {
@@ -13,30 +13,59 @@ function triggerBlobDownload(blob: Blob, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+interface ZipEntry {
+  name: string
+  input: Blob
+  lastModified: Date
+}
+
+interface Options {
+  onProgress?: (done: number, total: number) => void
+  /** Range chaque PDF dans un sous-dossier nommé d'après sa catégorie. */
+  foldersByType?: boolean
+  /** Nombre de téléchargements simultanés (vitesse). */
+  concurrency?: number
+}
+
+async function fetchEntry(doc: DocItem, foldersByType: boolean): Promise<ZipEntry> {
+  const res = await fetch(pdfProxyUrl(doc))
+  if (!res.ok) throw new Error(`Échec du téléchargement : ${doc.name}`)
+  return {
+    name: foldersByType ? `${doc.type}/${doc.file}` : doc.file,
+    input: await res.blob(),
+    lastModified: doc.date ? new Date(doc.date) : new Date(),
+  }
+}
+
 /**
  * Télécharge un ensemble de documents dans une archive ZIP.
- * Chaque PDF est récupéré via /api/pdf/[id] (même origine, donc aucun
- * souci de CORS) puis ajouté à l'archive. Le ZIP est assemblé côté client,
- * ce qui évite les limites de taille/durée des fonctions serverless.
+ * Les PDF sont récupérés EN PARALLÈLE via /api/pdf/[id]?proxy=1 (même origine,
+ * donc aucun souci de CORS), puis assemblés côté client (sans limite de
+ * taille/durée des fonctions serverless). Avec `foldersByType`, chaque
+ * catégorie devient un sous-dossier contenant ses PDF.
  */
 export async function downloadDocsAsZip(
   docs: DocItem[],
   zipName: string,
-  onProgress?: (done: number, total: number) => void,
+  { onProgress, foldersByType = false, concurrency = 6 }: Options = {},
 ): Promise<void> {
-  const files: { name: string; input: Blob; lastModified: Date }[] = []
+  const entries: ZipEntry[] = new Array(docs.length)
   let done = 0
-  for (const doc of docs) {
-    const res = await fetch(pdfUrl(doc))
-    if (!res.ok) throw new Error(`Échec du téléchargement : ${doc.name}`)
-    files.push({
-      name: doc.file,
-      input: await res.blob(),
-      lastModified: doc.date ? new Date(doc.date) : new Date(),
-    })
-    done += 1
-    onProgress?.(done, docs.length)
+  let next = 0
+
+  async function worker() {
+    for (;;) {
+      const i = next++
+      if (i >= docs.length) break
+      entries[i] = await fetchEntry(docs[i], foldersByType)
+      done += 1
+      onProgress?.(done, docs.length)
+    }
   }
-  const zipBlob = await downloadZip(files).blob()
+
+  const workers = Array.from({ length: Math.min(concurrency, docs.length) }, worker)
+  await Promise.all(workers)
+
+  const zipBlob = await downloadZip(entries).blob()
   triggerBlobDownload(zipBlob, zipName)
 }

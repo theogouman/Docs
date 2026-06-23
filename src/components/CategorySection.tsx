@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { TYPE_STYLES, type DocItem, type DocType } from '../lib/types'
 import DocumentCard from './DocumentCard'
 import ZipButton from './ZipButton'
@@ -7,45 +6,67 @@ interface Props {
   type: DocType
   docs: DocItem[]
   zipName: string
-  defaultOpen?: boolean
+  open: boolean
+  onToggle: () => void
   onOpenDetail: (doc: DocItem) => void
 }
 
 /**
  * Catégorie repliable (toggle) dans un encadré « glassmorphism ».
- * Ouverture / fermeture animée en douceur via l'astuce grid-rows 0fr↔1fr
- * (hauteur auto fluide) + fondu, easing repris de transitions.dev.
+ * Ouverture/fermeture pilotée par l'App (les tags l'ouvrent aussi).
+ * Animation fluide via l'astuce grid-rows 0fr↔1fr (hauteur auto) + fondu.
  */
 export default function CategorySection({
   type,
   docs,
   zipName,
-  defaultOpen = true,
+  open,
+  onToggle,
   onOpenDetail,
 }: Props) {
-  const [open, setOpen] = useState(defaultOpen)
   const style = TYPE_STYLES[type]
-  const panelId = `cat-${type}`
+  const panelId = `cat-panel-${type}`
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/60 bg-white/40 shadow-lg shadow-gray-900/5 ring-1 ring-black/5 backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl">
-      <h2>
+    <section
+      id={`cat-section-${type}`}
+      className="scroll-mt-4 overflow-hidden rounded-2xl border border-white/60 bg-white/40 shadow-lg shadow-gray-900/5 ring-1 ring-black/5 backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl"
+    >
+      {/* En-tête : le téléchargement de catégorie reste sur la ligne du chevron,
+          accessible même quand la catégorie est repliée. */}
+      <div className="flex items-center gap-2 px-3 py-2.5 sm:px-4">
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
-          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-white/40 sm:px-5"
+          className="flex flex-1 items-center gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-white/50"
         >
           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${style.dot}`} aria-hidden="true" />
           <span className="text-sm font-semibold uppercase tracking-wide text-gray-700">{type}</span>
           <span className="rounded-full bg-gray-900/5 px-2 py-0.5 text-xs font-semibold text-gray-500">
             {docs.length}
           </span>
+        </button>
+
+        <ZipButton
+          docs={docs}
+          zipName={zipName}
+          label="Télécharger la catégorie"
+          responsiveLabel
+          className="border border-gray-300 bg-white/70 text-gray-600 hover:bg-white"
+        />
+
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-controls={panelId}
+          aria-label={open ? 'Replier la catégorie' : 'Déplier la catégorie'}
+          className="shrink-0 rounded-lg p-1.5 text-gray-400 transition hover:bg-white/60 hover:text-gray-700"
+        >
           <svg
-            className={`ml-auto h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 ${
-              open ? 'rotate-180' : ''
-            }`}
+            className={`h-5 w-5 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -57,7 +78,7 @@ export default function CategorySection({
             />
           </svg>
         </button>
-      </h2>
+      </div>
 
       <div
         id={panelId}
@@ -67,14 +88,6 @@ export default function CategorySection({
       >
         <div className="min-h-0 overflow-hidden">
           <div className="border-t border-white/50 px-4 pb-5 pt-4 sm:px-5">
-            <div className="mb-4 flex justify-end">
-              <ZipButton
-                docs={docs}
-                zipName={zipName}
-                label="Télécharger la catégorie"
-                className="border border-gray-300 bg-white/70 text-gray-600 hover:bg-white"
-              />
-            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {docs.map((doc, i) => (
                 <DocumentCard key={doc.id} doc={doc} index={i} onOpenDetail={onOpenDetail} />

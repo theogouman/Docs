@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react'
 import type { DocItem } from '../lib/types'
 import { formatDate } from '../lib/format'
 import Badge from './Badge'
@@ -9,6 +10,13 @@ interface Props {
 }
 
 export default function DocumentTable({ docs, onOpenDetail }: Props) {
+  function onRowKeyDown(e: KeyboardEvent, doc: DocItem) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      onOpenDetail(doc)
+    }
+  }
+
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -23,16 +31,15 @@ export default function DocumentTable({ docs, onOpenDetail }: Props) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {docs.map((doc) => (
-            <tr key={doc.id} className="align-top hover:bg-gray-50">
-              <td className="px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => onOpenDetail(doc)}
-                  className="text-left font-medium text-gray-900 hover:text-blue-700"
-                >
-                  {doc.name}
-                </button>
-              </td>
+            <tr
+              key={doc.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => onOpenDetail(doc)}
+              onKeyDown={(e) => onRowKeyDown(e, doc)}
+              className="cursor-pointer align-top transition-colors hover:bg-gray-50"
+            >
+              <td className="px-4 py-3 font-medium text-gray-900">{doc.name}</td>
               <td className="px-4 py-3">
                 <Badge type={doc.type} />
               </td>
@@ -40,7 +47,7 @@ export default function DocumentTable({ docs, onOpenDetail }: Props) {
                 <span className="line-clamp-2">{doc.summary}</span>
               </td>
               <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 sm:table-cell">
-                {doc.date ? formatDate(doc.date) : '—'}
+                {doc.date ? formatDate(doc.date) : ''}
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end">
