@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Police SF Pro Display auto-hébergée — Regular (titres en gras, textes) */
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/sf-pro-display-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/sf-pro-display-bold.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light;
 
