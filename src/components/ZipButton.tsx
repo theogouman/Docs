@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react'
+import { Download, LoaderCircle } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { downloadDocsAsZip } from '../lib/download'
 
@@ -63,18 +64,12 @@ export default function ZipButton({
     >
       {busy ? (
         <>
-          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
-          </svg>
+          <LoaderCircle className="h-4 w-4 animate-spin" />
           <span>{progress ? `${busyLabel} ${progress.done}/${progress.total}` : `${busyLabel}…`}</span>
         </>
       ) : (
         <>
-          <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M10 2a1 1 0 0 1 1 1v7.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L9 10.586V3a1 1 0 0 1 1-1Z" />
-            <path d="M4 14a1 1 0 0 1 1 1v1h10v-1a1 1 0 1 1 2 0v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Z" />
-          </svg>
+          <Download className="h-4 w-4" />
           <span className={labelClass}>{error ? 'Réessayer' : label}</span>
         </>
       )}

@@ -37,7 +37,7 @@ export default function DocumentCard({ doc, onOpenDetail, index = 0 }: Props) {
         )}
       </div>
 
-      <h3 className="mt-3 text-base font-semibold leading-snug text-gray-900 transition-colors group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-400">
+      <h3 className="mt-3 text-base font-semibold leading-snug text-gray-900 dark:text-gray-100">
         {doc.name}
       </h3>
 

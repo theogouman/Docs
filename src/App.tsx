@@ -80,7 +80,7 @@ export default function App() {
 
   return (
     <PasswordGate>
-      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
         <Header />
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">

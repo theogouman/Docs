@@ -1,3 +1,4 @@
+import { Download, ExternalLink } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { pdfUrl, pdfDownloadUrl } from '../lib/pdf'
 
@@ -7,20 +8,6 @@ interface Props {
   /** « compact » = boutons icône seule (vue Tableau, plus épuré). */
   variant?: 'default' | 'compact'
 }
-
-const OpenIcon = (
-  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-    <path d="M11 3a1 1 0 1 0 0 2h2.586l-6.293 6.293a1 1 0 1 0 1.414 1.414L15 6.414V9a1 1 0 1 0 2 0V4a1 1 0 0 0-1-1h-5Z" />
-    <path d="M5 5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3a1 1 0 1 0-2 0v3H5V7h3a1 1 0 0 0 0-2H5Z" />
-  </svg>
-)
-
-const DownloadIcon = (
-  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-    <path d="M10 2a1 1 0 0 1 1 1v7.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L9 10.586V3a1 1 0 0 1 1-1Z" />
-    <path d="M4 14a1 1 0 0 1 1 1v1h10v-1a1 1 0 1 1 2 0v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Z" />
-  </svg>
-)
 
 /**
  * Boutons « Ouvrir » (nouvel onglet) et « Télécharger ».
@@ -42,7 +29,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
           title="Ouvrir"
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
-          {OpenIcon}
+          <ExternalLink className="h-4 w-4" />
         </a>
         <a
           href={dl}
@@ -51,7 +38,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
           title="Télécharger"
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
-          {DownloadIcon}
+          <Download className="h-4 w-4" />
         </a>
       </div>
     )
@@ -68,7 +55,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         aria-label={`Ouvrir le PDF : ${doc.name}`}
         className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-900 font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white ${pad}`}
       >
-        {OpenIcon}
+        <ExternalLink className="h-4 w-4" />
         Ouvrir
       </a>
       <a
@@ -77,7 +64,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         aria-label={`Télécharger le PDF : ${doc.name}`}
         className={`inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${pad}`}
       >
-        {DownloadIcon}
+        <Download className="h-4 w-4" />
         Télécharger
       </a>
     </div>

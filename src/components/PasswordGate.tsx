@@ -60,7 +60,7 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
           }}
           aria-invalid={error}
           aria-describedby={error ? 'gate-error' : undefined}
-          className="mt-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
+          className="mt-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-gray-500"
           placeholder="Mot de passe"
         />
         {error && (

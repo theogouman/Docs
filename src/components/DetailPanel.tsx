@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { formatDate } from '../lib/format'
 import { pdfUrl } from '../lib/pdf'
@@ -39,7 +40,7 @@ export default function DetailPanel({ doc, onClose }: Props) {
       />
 
       <div
-        className={`relative z-10 flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state} dark:bg-gray-900 dark:ring-1 dark:ring-white/10 md:h-[88vh] md:flex-row`}
+        className={`relative z-10 flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state} dark:bg-gray-900 dark:ring-1 dark:ring-white/10 md:h-[90vh] md:flex-row`}
       >
         <button
           type="button"
@@ -47,9 +48,7 @@ export default function DetailPanel({ doc, onClose }: Props) {
           aria-label="Fermer"
           className="absolute right-3 top-3 z-20 rounded-lg bg-white/90 p-1.5 text-gray-500 shadow-sm transition hover:bg-white hover:text-gray-800 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
         >
-          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-          </svg>
+          <X className="h-5 w-5" />
         </button>
 
         {/* Colonne gauche : détail */}
@@ -84,7 +83,7 @@ export default function DetailPanel({ doc, onClose }: Props) {
         {/* Colonne droite : PDF chargé directement */}
         <div className="relative min-h-0 flex-1 bg-gray-100 dark:bg-gray-950">
           <iframe
-            src={pdfUrl(current)}
+            src={`${pdfUrl(current)}#toolbar=1&navpanes=0&statusbar=0&view=FitH&pagemode=none`}
             title={`Aperçu : ${current.name}`}
             className="h-full w-full border-0"
           />

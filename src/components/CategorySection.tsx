@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react'
 import { TYPE_STYLES, type DocItem, type DocType } from '../lib/types'
 import DocumentCard from './DocumentCard'
 import ZipButton from './ZipButton'
@@ -55,7 +56,7 @@ export default function CategorySection({
             onClick={onToggle}
             aria-expanded={open}
             aria-controls={panelId}
-            className="flex flex-1 items-center gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-white/50 dark:hover:bg-white/10"
+            className="flex flex-1 items-center gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-white/50 dark:hover:bg-transparent"
           >
             {heading}
           </button>
@@ -78,20 +79,12 @@ export default function CategorySection({
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={open ? 'Replier la catégorie' : 'Déplier la catégorie'}
-            className="shrink-0 rounded-lg p-1.5 text-gray-400 transition hover:bg-white/60 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            className="shrink-0 rounded-lg p-1.5 text-gray-400 transition hover:bg-white/60 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-transparent dark:hover:text-gray-300"
           >
-            <svg
+            <ChevronDown
               className={`h-5 w-5 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-              viewBox="0 0 20 20"
-              fill="currentColor"
               aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                clipRule="evenodd"
-              />
-            </svg>
+            />
           </button>
         )}
       </div>
