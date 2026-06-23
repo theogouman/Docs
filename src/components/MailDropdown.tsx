@@ -5,6 +5,11 @@ import { Mail } from 'lucide-react'
 const GMAIL_URL = 'https://mail.google.com/mail/u/0/#search/from%3Atheo%40gouman.fr'
 const OUTLOOK_URL = 'https://outlook.office.com/mail/'
 
+const GMAIL_ICON =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gmail_icon_%282020%29.svg/1280px-Gmail_icon_%282020%29.svg.png'
+const OUTLOOK_ICON =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Microsoft_Outlook_Icon_%282025%E2%80%93present%29.svg/960px-Microsoft_Outlook_Icon_%282025%E2%80%93present%29.svg.png'
+
 /**
  * « Ouvrir mes mails » : bouton circulaire qui se métamorphose en menu
  * Gmail / Outlook (animation « Plus to menu morph » de transitions.dev).
@@ -39,20 +44,13 @@ export default function MailDropdown() {
         className="t-morph absolute bottom-0 right-0 border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10"
         data-open={open}
       >
-        <div className="t-morph-menu flex flex-col p-2">
-          <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-            Ouvrir mes mails
-          </p>
+        <div className="t-morph-menu flex flex-col p-1.5">
           <a href={GMAIL_URL} target="_blank" rel="noopener noreferrer" className={itemClass}>
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-red-500 text-xs font-bold text-white">
-              M
-            </span>
+            <img src={GMAIL_ICON} alt="" className="h-5 w-5 shrink-0 object-contain" />
             Gmail
           </a>
           <a href={OUTLOOK_URL} target="_blank" rel="noopener noreferrer" className={itemClass}>
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-blue-600 text-xs font-bold text-white">
-              O
-            </span>
+            <img src={OUTLOOK_ICON} alt="" className="h-5 w-5 shrink-0 object-contain" />
             Outlook
           </a>
         </div>

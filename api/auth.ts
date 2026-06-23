@@ -206,9 +206,9 @@ async function sendCode(to: string, code: string): Promise<void> {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM || 'Dataroom <onboarding@resend.dev>',
+        from: process.env.RESEND_FROM || 'Théo Gouman ⎜ Dataroom <onboarding@resend.dev>',
         to,
-        subject: `Votre code d'accès : ${code}`,
+        subject: `${code} est votre code de connexion`,
         html: emailHtml(code),
         text: `Votre code d'accès : ${code} (expire dans 10 minutes).`,
       }),
@@ -221,9 +221,9 @@ async function sendCode(to: string, code: string): Promise<void> {
   if (!user || !pass) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD manquants')
   const transport = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user, pass } })
   await transport.sendMail({
-    from: `Dataroom <${user}>`,
+    from: `Théo Gouman ⎜ Dataroom <${user}>`,
     to,
-    subject: `Votre code d'accès : ${code}`,
+    subject: `${code} est votre code de connexion`,
     text: `Votre code d'accès : ${code} (expire dans 10 minutes).`,
     html: emailHtml(code),
   })
@@ -291,7 +291,7 @@ async function actVerify(req: Json, res: Json) {
       maxAge: 7 * 24 * 3600,
     })
     try {
-      await createLog('Connexion', otp.email)
+      await createLog('Connexion', otp.email, "S'est connecté")
     } catch {
       /* best-effort */
     }

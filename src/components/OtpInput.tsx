@@ -71,7 +71,7 @@ export default function OtpInput({ value, onChange, onComplete, disabled, error 
           onKeyDown={(e) => handleKey(i, e)}
           onPaste={handlePaste}
           aria-label={`Chiffre ${i + 1}`}
-          className={`h-[4.5rem] w-12 rounded-2xl border bg-gray-100 text-center text-2xl font-bold text-gray-900 shadow-sm outline-none transition focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-400 disabled:opacity-60 dark:bg-gray-800 dark:text-gray-100 dark:focus:bg-gray-900 sm:w-16 ${
+          className={`h-[4.5rem] w-12 rounded-2xl border bg-gray-100 text-center text-2xl font-bold text-gray-900 shadow-sm outline-none transition focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-200 disabled:opacity-60 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-gray-500 dark:focus:bg-gray-900 dark:focus:ring-gray-700 sm:w-16 ${
             error ? 'border-red-300 dark:border-red-500/50' : 'border-gray-200 dark:border-gray-700'
           }`}
         />

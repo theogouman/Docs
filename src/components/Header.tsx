@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ThemeToggle from './ThemeToggle'
+import SettingsMenu from './SettingsMenu'
 import StakeholdersModal from './StakeholdersModal'
 
 export default function Header() {
@@ -22,7 +22,7 @@ export default function Header() {
           </button>
         </div>
 
-        <ThemeToggle />
+        <SettingsMenu />
       </div>
 
       <StakeholdersModal open={stakeholdersOpen} onClose={() => setStakeholdersOpen(false)} />
