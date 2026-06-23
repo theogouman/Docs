@@ -1,0 +1,2 @@
+# Les PDF sont copiés ici localement via scripts/copy-docs.sh.
+# Ils ne sont pas committés (voir .gitignore et README).

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+.vercel
+.idea/
+.vscode/
+
+# PDF du dossier — données personnelles de tiers, NE PAS committer.
+# Copiés localement via scripts/copy-docs.sh (voir README).
+public/documents/*.pdf
+
+# tsc incremental build info
+*.tsbuildinfo
