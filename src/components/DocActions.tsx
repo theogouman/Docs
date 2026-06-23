@@ -40,7 +40,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
           onClick={(e) => e.stopPropagation()}
           aria-label={`Ouvrir le PDF : ${doc.name}`}
           title="Ouvrir"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
           {OpenIcon}
         </a>
@@ -49,7 +49,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
           onClick={(e) => e.stopPropagation()}
           aria-label={`Télécharger le PDF : ${doc.name}`}
           title="Télécharger"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
           {DownloadIcon}
         </a>
@@ -66,7 +66,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         aria-label={`Ouvrir le PDF : ${doc.name}`}
-        className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-900 font-medium text-white transition hover:bg-gray-700 ${pad}`}
+        className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-900 font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white ${pad}`}
       >
         {OpenIcon}
         Ouvrir
@@ -75,7 +75,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
         href={dl}
         onClick={(e) => e.stopPropagation()}
         aria-label={`Télécharger le PDF : ${doc.name}`}
-        className={`inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 ${pad}`}
+        className={`inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${pad}`}
       >
         {DownloadIcon}
         Télécharger

@@ -32,16 +32,16 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-900"
         aria-labelledby="gate-title"
       >
-        <h1 id="gate-title" className="text-lg font-semibold text-gray-900">
+        <h1 id="gate-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Accès restreint
         </h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Documents de la vente du 3 rue Fenouillet, Hyères. Saisissez le mot de
           passe communiqué pour consulter le dossier.
         </p>
@@ -60,7 +60,7 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
           }}
           aria-invalid={error}
           aria-describedby={error ? 'gate-error' : undefined}
-          className="mt-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="mt-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
           placeholder="Mot de passe"
         />
         {error && (
@@ -70,11 +70,11 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
         )}
         <button
           type="submit"
-          className="mt-5 w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+          className="mt-5 w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
         >
           Accéder au dossier
         </button>
-        <p className="mt-4 text-xs leading-relaxed text-gray-400">
+        <p className="mt-4 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
           Protection de dissuasion uniquement, ne remplace pas une
           authentification d'hébergeur.
         </p>

@@ -30,7 +30,9 @@ const TYPE_COUNTS = TYPE_ORDER.reduce(
 
 export default function App() {
   const [query, setQuery] = useState('')
-  const [openCats, setOpenCats] = useState<Set<DocType>>(new Set())
+  const [selectedTypes, setSelectedTypes] = useState<Set<DocType>>(new Set())
+  // Catégories repliées manuellement (par défaut tout est ouvert).
+  const [collapsed, setCollapsed] = useState<Set<DocType>>(new Set())
   const [view, setView] = useState<ViewMode>('cards')
   const [detail, setDetail] = useState<DocItem | null>(null)
 
@@ -42,48 +44,43 @@ export default function App() {
     return DOCUMENTS.filter((doc) => normalize(`${doc.name} ${doc.summary}`).includes(q))
   }, [query])
 
-  // Groupes par type (ordre fixe), chacun trié par nom A→Z.
-  const groups = useMemo(
-    () =>
-      TYPE_ORDER.map((type) => ({
-        type,
-        docs: filtered.filter((d) => d.type === type).sort(byName),
-      })).filter((g) => g.docs.length > 0),
-    [filtered],
-  )
+  // Groupes par type (ordre fixe), chacun trié par nom A→Z, restreints au
+  // filtre de catégories (tags) s'il y en a un.
+  const groups = useMemo(() => {
+    return TYPE_ORDER.map((type) => ({
+      type,
+      docs: filtered.filter((d) => d.type === type).sort(byName),
+    }))
+      .filter((g) => g.docs.length > 0)
+      .filter((g) => selectedTypes.size === 0 || selectedTypes.has(g.type))
+  }, [filtered, selectedTypes])
 
-  // Vue tableau : liste à plat, ordonnée par type puis par nom.
   const flat = useMemo(() => groups.flatMap((g) => g.docs), [groups])
+  const shownCount = flat.length
+  // Une seule catégorie affichée -> pas d'accordéon (#4).
+  const collapsible = groups.length > 1
 
-  // Une catégorie est ouverte si on l'a ouverte (tag/chevron), ou pendant une
-  // recherche (on déplie tout ce qui contient des résultats).
-  const isOpen = (type: DocType) => searching || openCats.has(type)
+  const isOpen = (type: DocType) => searching || !collapsed.has(type)
 
-  function toggleCat(type: DocType) {
-    const willOpen = !openCats.has(type)
-    setOpenCats((prev) => {
+  function toggleFilter(type: DocType) {
+    setSelectedTypes((prev) => {
       const next = new Set(prev)
       next.has(type) ? next.delete(type) : next.add(type)
       return next
     })
-    if (willOpen) {
-      setTimeout(() => {
-        document
-          .getElementById(`cat-section-${type}`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 60)
-    }
   }
 
-  const openTypes = useMemo(
-    () => new Set(TYPE_ORDER.filter((t) => isOpen(t))),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openCats, searching],
-  )
+  function toggleCollapse(type: DocType) {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(type) ? next.delete(type) : next.add(type)
+      return next
+    })
+  }
 
   return (
     <PasswordGate>
-      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
         <Header />
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -91,12 +88,12 @@ export default function App() {
             <SearchBar value={query} onChange={setQuery} />
             <TypeFilters
               counts={TYPE_COUNTS}
-              selected={openTypes}
-              onToggle={toggleCat}
-              onClear={() => setOpenCats(new Set())}
+              selected={selectedTypes}
+              onToggle={toggleFilter}
+              onClear={() => setSelectedTypes(new Set())}
             />
             <Toolbar
-              count={filtered.length}
+              count={shownCount}
               total={TOTAL}
               view={view}
               onView={setView}
@@ -106,16 +103,16 @@ export default function App() {
                   zipName="dossier-fenouillet.zip"
                   label="Tout télécharger"
                   foldersByType
-                  className="bg-gray-900 text-white hover:bg-gray-700"
+                  className="bg-gray-900 text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
                 />
               }
             />
           </div>
 
           <div className="mt-6">
-            {filtered.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-                <p className="text-sm text-gray-500">
+            {shownCount === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Aucun document ne correspond à votre recherche.
                 </p>
               </div>
@@ -130,15 +127,16 @@ export default function App() {
                     docs={group.docs}
                     zipName={`fenouillet-${slug(group.type)}.zip`}
                     open={isOpen(group.type)}
-                    onToggle={() => toggleCat(group.type)}
+                    onToggle={() => toggleCollapse(group.type)}
                     onOpenDetail={setDetail}
+                    collapsible={collapsible}
                   />
                 ))}
               </div>
             )}
           </div>
 
-          <footer className="mt-12 border-t border-gray-200 pt-6 text-xs leading-relaxed text-gray-400">
+          <footer className="mt-12 border-t border-gray-200 pt-6 text-xs leading-relaxed text-gray-400 dark:border-gray-800 dark:text-gray-500">
             <p>
               Dossier confidentiel. Données personnelles de tiers, diffusion
               restreinte au notaire, aux associés et à l'acquéreur.

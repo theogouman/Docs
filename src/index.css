@@ -20,6 +20,13 @@
 
 :root {
   color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+:root {
 
   /* Jetons d'animation repris de transitions.dev (Jakubantalik/transitions.dev) */
   --t-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ease-smooth-out */

@@ -21,11 +21,20 @@
     />
     <meta
       name="description"
-      content="Bibliothèque de documents — Vente 3 rue Fenouillet, Hyères (SAS La Relève Hyères)."
+      content="Dataroom de la vente SAS La Relève Hyères / Maley."
     />
-    <title>Documents — Vente 3 rue Fenouillet, Hyères</title>
+    <title>Dataroom - Vente SAS La Relève Hyères / Maley</title>
+    <script>
+      // Applique le thème avant le rendu (évite le flash clair/sombre).
+      try {
+        var t = localStorage.getItem('theme')
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        }
+      } catch (e) {}
+    </script>
   </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
+  <body class="bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { DocItem } from '../lib/types'
 import { formatDate } from '../lib/format'
 import { pdfUrl } from '../lib/pdf'
+import { useModalState } from '../lib/useModalState'
 import Badge from './Badge'
 import DocActions from './DocActions'
 
@@ -11,51 +12,22 @@ interface Props {
 }
 
 /**
- * Vue détail en aperçu centré (modal), avec animations d'ouverture /
- * fermeture (scale + opacité, reprises de transitions.dev).
+ * Vue document en deux colonnes : à gauche le détail (titre, date,
+ * description, téléchargement), à droite le PDF chargé directement.
+ * Sur mobile, les colonnes s'empilent (détail puis PDF).
  */
 export default function DetailPanel({ doc, onClose }: Props) {
   const [current, setCurrent] = useState<DocItem | null>(doc)
-  const [open, setOpen] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>()
-
-  // Pilote l'apparition / disparition pour jouer les transitions.
   useEffect(() => {
-    if (doc) {
-      if (closeTimer.current) clearTimeout(closeTimer.current)
-      setCurrent(doc)
-      setShowPreview(false)
-      const id = requestAnimationFrame(() => setOpen(true))
-      return () => cancelAnimationFrame(id)
-    }
-    setOpen(false)
-    closeTimer.current = setTimeout(() => setCurrent(null), 220)
-    return () => {
-      if (closeTimer.current) clearTimeout(closeTimer.current)
-    }
+    if (doc) setCurrent(doc)
   }, [doc])
 
-  // Échap pour fermer + verrouillage du défilement de fond.
-  useEffect(() => {
-    if (!current) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-    }
-  }, [current, onClose])
-
-  if (!current) return null
-  const state = open ? 'is-open' : 'is-closing'
+  const { mounted, state } = useModalState(!!doc, onClose)
+  if (!mounted || !current) return null
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-title"
@@ -67,57 +39,55 @@ export default function DetailPanel({ doc, onClose }: Props) {
       />
 
       <div
-        className={`relative z-10 flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state}`}
+        className={`relative z-10 flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state} dark:bg-gray-900 dark:ring-1 dark:ring-white/10 md:h-[88vh] md:flex-row`}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer"
+          className="absolute right-3 top-3 z-20 rounded-lg bg-white/90 p-1.5 text-gray-500 shadow-sm transition hover:bg-white hover:text-gray-800 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+          </svg>
+        </button>
+
+        {/* Colonne gauche : détail */}
+        <div className="flex max-h-[40vh] w-full shrink-0 flex-col overflow-y-auto border-b border-gray-200 p-5 dark:border-gray-800 md:max-h-none md:w-80 md:border-b-0 md:border-r lg:w-96">
           <div>
             <Badge type={current.type} />
-            <h2 id="detail-title" className="mt-3 text-lg font-semibold leading-snug text-gray-900">
-              {current.name}
-            </h2>
-            {current.date && (
-              <time className="mt-1 block text-sm text-gray-500" dateTime={current.date}>
-                {formatDate(current.date)}
-              </time>
-            )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fermer"
-            className="shrink-0 rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+          <h2
+            id="detail-title"
+            className="mt-3 pr-8 text-lg font-semibold leading-snug text-gray-900 dark:text-gray-100"
           >
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-            </svg>
-          </button>
-        </div>
+            {current.name}
+          </h2>
+          {current.date && (
+            <time className="mt-1 block text-sm text-gray-500 dark:text-gray-400" dateTime={current.date}>
+              {formatDate(current.date)}
+            </time>
+          )}
 
-        <div className="flex-1 overflow-y-auto p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Résumé</h3>
-          <p className="mt-2 text-sm font-normal leading-relaxed text-gray-700">{current.summary}</p>
+          <h3 className="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+            Description
+          </h3>
+          <p className="mt-2 text-sm font-normal leading-relaxed text-gray-700 dark:text-gray-300">
+            {current.summary}
+          </p>
 
-          <div className="mt-5">
-            {showPreview ? (
-              <iframe
-                src={pdfUrl(current)}
-                title={`Aperçu : ${current.name}`}
-                className="h-[28rem] w-full rounded-lg border border-gray-200"
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowPreview(true)}
-                className="w-full rounded-lg border border-dashed border-gray-300 py-6 text-sm text-gray-500 transition hover:border-gray-400 hover:text-gray-700"
-              >
-                Afficher l'aperçu du PDF
-              </button>
-            )}
+          <div className="mt-6 pt-1">
+            <DocActions doc={current} size="md" />
           </div>
         </div>
 
-        <div className="border-t border-gray-200 p-5">
-          <DocActions doc={current} size="md" />
+        {/* Colonne droite : PDF chargé directement */}
+        <div className="relative min-h-0 flex-1 bg-gray-100 dark:bg-gray-950">
+          <iframe
+            src={pdfUrl(current)}
+            title={`Aperçu : ${current.name}`}
+            className="h-full w-full border-0"
+          />
         </div>
       </div>
     </div>

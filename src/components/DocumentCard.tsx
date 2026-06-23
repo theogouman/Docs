@@ -25,7 +25,7 @@ export default function DocumentCard({ doc, onOpenDetail, index = 0 }: Props) {
       tabIndex={0}
       onClick={() => onOpenDetail(doc)}
       onKeyDown={onKeyDown}
-      className="t-reveal group flex h-full cursor-pointer flex-col rounded-xl border border-white/70 bg-white/80 p-5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+      className="t-reveal group flex h-full cursor-pointer flex-col rounded-xl border border-white/70 bg-white/80 p-5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10"
       style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -37,11 +37,11 @@ export default function DocumentCard({ doc, onOpenDetail, index = 0 }: Props) {
         )}
       </div>
 
-      <h3 className="mt-3 text-base font-semibold leading-snug text-gray-900 transition-colors group-hover:text-blue-700">
+      <h3 className="mt-3 text-base font-semibold leading-snug text-gray-900 transition-colors group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-400">
         {doc.name}
       </h3>
 
-      <p className="mt-2 line-clamp-3 text-sm font-normal leading-relaxed text-gray-600">
+      <p className="mt-2 line-clamp-3 text-sm font-normal leading-relaxed text-gray-600 dark:text-gray-300">
         {doc.summary}
       </p>
 
