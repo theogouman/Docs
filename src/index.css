@@ -4,6 +4,18 @@
 
 :root {
   color-scheme: light;
+
+  /* Jetons d'animation repris de transitions.dev (Jakubantalik/transitions.dev) */
+  --t-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ease-smooth-out */
+  --t-dur-quick: 150ms;
+  --t-dur-fast: 250ms;
+  --t-dur-medium: 350ms;
+  --t-dur-slow: 400ms;
+  --t-dur-very-slow: 500ms;
+  --t-stagger: 40ms;
+  --t-distance: 12px;
+  --t-blur: 3px;
+  --t-scale: 0.96;
 }
 
 html {
@@ -15,4 +27,67 @@ html {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ---- Apparition de texte / cartes (P18 + P6 de transitions.dev) ---- */
+@keyframes t-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--t-distance));
+    filter: blur(var(--t-blur));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.t-reveal {
+  animation: t-reveal-in var(--t-dur-very-slow) var(--t-ease) both;
+  will-change: transform, opacity, filter;
+}
+
+/* ---- Overlay du modal : fondu (P7) ---- */
+.t-overlay {
+  opacity: 0;
+  transition: opacity var(--t-dur-fast) var(--t-ease);
+}
+.t-overlay.is-open {
+  opacity: 1;
+}
+.t-overlay.is-closing {
+  opacity: 0;
+  transition-duration: var(--t-dur-quick);
+}
+
+/* ---- Modal centré : scale + opacité (P7, origin-aware open/close) ---- */
+.t-modal {
+  transform: scale(var(--t-scale));
+  opacity: 0;
+  transition:
+    transform var(--t-dur-fast) var(--t-ease),
+    opacity var(--t-dur-fast) var(--t-ease);
+  will-change: transform, opacity;
+}
+.t-modal.is-open {
+  transform: scale(1);
+  opacity: 1;
+}
+.t-modal.is-closing {
+  transform: scale(var(--t-scale));
+  opacity: 0;
+  transition-duration: var(--t-dur-quick);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-reveal,
+  .t-overlay,
+  .t-modal {
+    animation: none !important;
+    transition-duration: 1ms !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
 }

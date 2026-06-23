@@ -44,7 +44,7 @@ export default function DocumentTable({ docs, onOpenDetail }: Props) {
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end">
-                  <DocActions doc={doc} />
+                  <DocActions doc={doc} variant="compact" />
                 </div>
               </td>
             </tr>

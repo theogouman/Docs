@@ -9,7 +9,7 @@ interface Props {
 
 export default function TypeFilters({ counts, selected, onToggle, onClear }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrer par type">
+    <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label="Filtrer par type">
       {TYPE_ORDER.map((type) => {
         const isOn = selected.has(type)
         const style = TYPE_STYLES[type]
@@ -19,18 +19,24 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
             type="button"
             onClick={() => onToggle(type)}
             aria-pressed={isOn}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-[0.97] ${
               isOn
-                ? 'border-gray-900 bg-gray-900 text-white'
-                : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                ? 'border-gray-900 bg-gray-900 text-white shadow'
+                : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             <span
-              className={`h-1.5 w-1.5 rounded-full ${isOn ? 'bg-white' : style.dot}`}
+              className={`h-2.5 w-2.5 rounded-full ${isOn ? 'bg-white' : style.dot}`}
               aria-hidden="true"
             />
             {type}
-            <span className={isOn ? 'text-gray-300' : 'text-gray-400'}>{counts[type]}</span>
+            <span
+              className={`inline-flex min-w-[1.25rem] justify-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+                isOn ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {counts[type]}
+            </span>
           </button>
         )
       })}
@@ -38,7 +44,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
         <button
           type="button"
           onClick={onClear}
-          className="ml-1 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 underline-offset-2 hover:text-gray-900 hover:underline"
+          className="ml-1 rounded-full px-3 py-2 text-sm font-medium text-gray-500 underline-offset-2 transition hover:text-gray-900 hover:underline"
         >
           Tout effacer
         </button>

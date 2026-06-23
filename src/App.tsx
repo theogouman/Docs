@@ -16,11 +16,15 @@ import Toolbar from './components/Toolbar'
 import DocumentCard from './components/DocumentCard'
 import DocumentTable from './components/DocumentTable'
 import DetailPanel from './components/DetailPanel'
+import ZipButton from './components/ZipButton'
 
 const DOCUMENTS = rawDocuments as DocItem[]
 const TOTAL = DOCUMENTS.length
 
 const byName = (a: DocItem, b: DocItem) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+
+const slug = (s: string) =>
+  normalize(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 // Compteurs par type, calculés une fois sur l'ensemble du corpus.
 const TYPE_COUNTS = TYPE_ORDER.reduce(
@@ -69,8 +73,8 @@ export default function App() {
 
   const renderCards = (docs: DocItem[]) => (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {docs.map((doc) => (
-        <DocumentCard key={doc.id} doc={doc} onOpenDetail={setDetail} />
+      {docs.map((doc, i) => (
+        <DocumentCard key={doc.id} doc={doc} index={i} onOpenDetail={setDetail} />
       ))}
     </div>
   )
@@ -96,6 +100,14 @@ export default function App() {
               onSort={setSort}
               view={view}
               onView={setView}
+              leadingAction={
+                <ZipButton
+                  docs={DOCUMENTS}
+                  zipName="dossier-fenouillet.zip"
+                  label="Tout télécharger"
+                  className="bg-gray-900 text-white hover:bg-gray-700"
+                />
+              }
             />
           </div>
 
@@ -112,10 +124,18 @@ export default function App() {
               <div className="space-y-8">
                 {groups.map((group) => (
                   <section key={group.type}>
-                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                      {group.type}
-                      <span className="ml-2 font-normal text-gray-400">{group.docs.length}</span>
-                    </h2>
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                        {group.type}
+                        <span className="ml-2 font-normal text-gray-400">{group.docs.length}</span>
+                      </h2>
+                      <ZipButton
+                        docs={group.docs}
+                        zipName={`fenouillet-${slug(group.type)}.zip`}
+                        label="Télécharger"
+                        className="border border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+                      />
+                    </div>
                     {renderCards(group.docs)}
                   </section>
                 ))}

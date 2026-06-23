@@ -17,11 +17,14 @@ d'attention), permet la **recherche plein texte**, le **filtrage par type**, le
 
 ## Stack
 
-- **Vite + React + TypeScript + Tailwind CSS.** Aucun back-end, aucune base de
-  données.
-- Toutes les métadonnées dans un seul fichier : `src/data/documents.json`.
-- Les PDF sont servis en statique depuis `public/documents/`.
-- Build 100 % statique (`npm run build`), hébergeable tel quel.
+- **Vite + React + TypeScript + Tailwind CSS.**
+- Toutes les métadonnées dans un seul fichier : `src/data/documents.json`
+  (chaque entrée porte le `notionId` de la page qui héberge le PDF).
+- **Les PDF sont récupérés depuis Notion** par une fonction serverless
+  (`api/pdf/[id].ts`) qui résout l'URL signée à la volée et streame le fichier
+  (même origine, donc aperçu/ouverture/téléchargement/ZIP sans souci de CORS).
+- Animations d'ouverture/fermeture et d'apparition reprises de
+  [transitions.dev](https://github.com/Jakubantalik/transitions.dev).
 
 ---
 
@@ -135,6 +138,17 @@ Le site est un build statique. La sortie est `dist/`.
    Protection* (ou Vercel Authentication). Voir Confidentialité.
 
 `vercel.json` ajoute déjà `X-Robots-Tag: noindex, nofollow`.
+
+#### Accès aux PDF (Notion)
+
+La fonction `api/pdf/[id].ts` lit le PDF depuis Notion à chaque requête :
+
+- **Sans configuration** : elle utilise les endpoints publics de Notion (la
+  page « Documents⎜Vente » est publiée publiquement). C'est le cas par défaut.
+- **Avec l'API officielle (recommandé pour la fiabilité)** : créer une
+  intégration interne Notion, partager la base avec elle, puis définir la
+  variable d'environnement **`NOTION_TOKEN`** dans *Vercel → Settings →
+  Environment Variables*. La fonction l'utilisera en priorité.
 
 ### Netlify
 

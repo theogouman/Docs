@@ -1,8 +1,14 @@
+import type { DocItem } from './types'
+
 /**
- * URL statique d'un PDF servi depuis public/documents/.
- * Respecte le base path de Vite (déploiement racine ou sous-dossier).
- * Aucun PDF n'est chargé tant qu'un lien n'est pas cliqué.
+ * URL de la route qui résout et sert le PDF depuis Notion.
+ * Le PDF n'est chargé qu'au moment où ce lien est ouvert/affiché.
  */
-export function pdfUrl(file: string): string {
-  return `${import.meta.env.BASE_URL}documents/${encodeURIComponent(file)}`
+export function pdfUrl(doc: Pick<DocItem, 'notionId'>): string {
+  return `${import.meta.env.BASE_URL}api/pdf/${doc.notionId}`
+}
+
+/** Même route, mais force le téléchargement avec un nom de fichier lisible. */
+export function pdfDownloadUrl(doc: Pick<DocItem, 'notionId' | 'file'>): string {
+  return `${pdfUrl(doc)}?download=1&name=${encodeURIComponent(doc.file)}`
 }
