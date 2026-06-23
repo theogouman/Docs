@@ -141,6 +141,22 @@ export default function App() {
               Dossier confidentiel. Données personnelles de tiers, diffusion
               restreinte au notaire, aux associés et à l'acquéreur.
             </p>
+            <p className="mt-2">
+              Plateforme administrée par{' '}
+              <span className="t-tt-wrap">
+                <button
+                  type="button"
+                  aria-describedby="admin-tt"
+                  className="t-tt-trigger cursor-default font-medium text-gray-600 underline decoration-dotted underline-offset-2 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                >
+                  Théo Gouman
+                </button>
+                <span className="t-tt" id="admin-tt" role="tooltip">
+                  06 46 26 26 10 · theo@gouman.fr
+                </span>
+              </span>
+              .
+            </p>
           </footer>
         </main>
 
