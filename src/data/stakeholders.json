@@ -1,74 +1,45 @@
-[
-  {
-    "role": "Acquéreur",
-    "name": "Maley",
-    "org": "",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Acquéreur de l'opération en cours."
+{
+  "vendeur": {
+    "label": "Côté vendeur",
+    "parties": [
+      {
+        "role": "Notaire",
+        "name": "Jérôme Dray",
+        "phone": "01 53 68 12 12",
+        "email": "jerome.dray@etude25.notaires.fr",
+        "link": "https://www.notaires.fr/fr/notaire/jerome-dray",
+        "linkLabel": "Fiche notaire"
+      },
+      {
+        "role": "Société vendeuse",
+        "name": "SAS La Relève Hyères",
+        "link": "https://annuaire-entreprises.data.gouv.fr/entreprise/la-releve-hyeres-987622057",
+        "linkLabel": "Annuaire entreprises"
+      },
+      {
+        "role": "Représentant",
+        "name": "Théo Gouman",
+        "phone": "06 46 26 26 10",
+        "email": "theo@gouman.fr"
+      }
+    ]
   },
-  {
-    "role": "Vendeur (propriétaire actuel)",
-    "name": "SAS La Relève Hyères",
-    "org": "SIRET 98762205700014 · TVA FR19987622057",
-    "email": "theo@gouman.fr",
-    "phone": "",
-    "address": "3 rue Fenouillet, 83400 Hyères",
-    "note": "Représentée par Théo Gouman."
-  },
-  {
-    "role": "Anciennes propriétaires (vente 2024)",
-    "name": "Florence Buzet et Marie-Christine Buzet",
-    "org": "Consorts Buzet",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Vendeuses du bien à la SAS La Relève Hyères le 30/04/2024."
-  },
-  {
-    "role": "Notaire",
-    "name": "Me Gabolde",
-    "org": "Office notarial de Carqueiranne",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Office ayant reçu la promesse et l'acte authentique de vente."
-  },
-  {
-    "role": "Agence immobilière",
-    "name": "Canat & Warton",
-    "org": "Agence de Hyères",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Intermédiaire de la mise en vente."
-  },
-  {
-    "role": "Diagnostiqueur",
-    "name": "M. Delavier",
-    "org": "SP Expertise Diags (Exim Provence)",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Auteur du dossier de diagnostic technique (rapport 2710)."
-  },
-  {
-    "role": "Entreprise de travaux",
-    "name": "SAS Mollicone",
-    "org": "Rénovation et remise en état",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Devis et factures de rénovation et du sinistre dégât des eaux."
-  },
-  {
-    "role": "Assureur",
-    "name": "AXA",
-    "org": "Assurance habitation",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "note": "Contrat habitation n°21955245904, sinistre dégât des eaux 2024."
+  "acheteur": {
+    "label": "Côté acquéreur",
+    "parties": [
+      {
+        "role": "Notaire",
+        "name": "Frédérique Duhamel",
+        "phone": "01 34 84 97 53",
+        "email": "f.duhamel.78139@notaires.fr",
+        "link": "https://www.notaires.fr/fr/notaire/frederique-duhamel",
+        "linkLabel": "Fiche notaire"
+      },
+      {
+        "role": "Acquéreur",
+        "name": "Léna Maley",
+        "phone": "06 74 12 88 93"
+      }
+    ]
   }
-]
+}
