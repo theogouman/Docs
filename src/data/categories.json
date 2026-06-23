@@ -1,0 +1,9 @@
+[
+  { "name": "Documents notarial de l'acquisition", "color": "blue" },
+  { "name": "Promesse", "color": "purple" },
+  { "name": "Diagnostics", "color": "green" },
+  { "name": "Travaux", "color": "orange" },
+  { "name": "Facture", "color": "yellow" },
+  { "name": "Sinistre", "color": "red" },
+  { "name": "Légal", "color": "gray" }
+]

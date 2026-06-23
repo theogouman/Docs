@@ -1,10 +1,11 @@
 import { ChevronDown } from 'lucide-react'
-import { TYPE_STYLES, type DocItem, type DocType } from '../lib/types'
+import { colorStyle, type Category, type DocItem } from '../lib/types'
 import DocumentCard from './DocumentCard'
 import ZipButton from './ZipButton'
 
 interface Props {
-  type: DocType
+  type: string
+  color: Category['color']
   docs: DocItem[]
   zipName: string
   open: boolean
@@ -21,6 +22,7 @@ interface Props {
  */
 export default function CategorySection({
   type,
+  color,
   docs,
   zipName,
   open,
@@ -28,13 +30,13 @@ export default function CategorySection({
   onOpenDetail,
   collapsible = true,
 }: Props) {
-  const style = TYPE_STYLES[type]
+  const dot = colorStyle(color).dot
   const panelId = `cat-panel-${type}`
   const expanded = collapsible ? open : true
 
   const heading = (
     <>
-      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${style.dot}`} aria-hidden="true" />
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
       <span className="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-200">
         {type}
       </span>

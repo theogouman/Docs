@@ -1,27 +1,29 @@
-import { TYPE_ORDER, TYPE_STYLES, type DocType } from '../lib/types'
+import { colorStyle, type Category } from '../lib/types'
 
 interface Props {
-  counts: Record<DocType, number>
-  selected: Set<DocType>
-  onToggle: (type: DocType) => void
+  categories: (Category & { count: number })[]
+  selected: Set<string>
+  onToggle: (type: string) => void
   onClear: () => void
 }
 
-export default function TypeFilters({ counts, selected, onToggle, onClear }: Props) {
+export default function TypeFilters({ categories, selected, onToggle, onClear }: Props) {
+  if (categories.length === 0) return null
+
   return (
     <div
       className="no-scrollbar -mx-4 flex items-center gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
       role="group"
       aria-label="Filtrer par type"
     >
-      {TYPE_ORDER.map((type) => {
-        const isOn = selected.has(type)
-        const style = TYPE_STYLES[type]
+      {categories.map((cat) => {
+        const isOn = selected.has(cat.name)
+        const dot = colorStyle(cat.color).dot
         return (
           <button
-            key={type}
+            key={cat.name}
             type="button"
-            onClick={() => onToggle(type)}
+            onClick={() => onToggle(cat.name)}
             aria-pressed={isOn}
             className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-[0.97] ${
               isOn
@@ -30,12 +32,10 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
             }`}
           >
             <span
-              className={`h-2.5 w-2.5 rounded-full ${
-                isOn ? 'bg-white dark:bg-gray-900' : style.dot
-              }`}
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${isOn ? 'bg-white dark:bg-gray-900' : dot}`}
               aria-hidden="true"
             />
-            {type}
+            {cat.name}
             <span
               className={`inline-flex min-w-[1.25rem] justify-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
                 isOn
@@ -43,7 +43,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
                   : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
-              {counts[type]}
+              {cat.count}
             </span>
           </button>
         )
