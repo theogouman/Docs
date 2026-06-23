@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { ChevronRight, LoaderCircle, Mail } from 'lucide-react'
+import { ChevronRight, LoaderCircle, Mail, Send } from 'lucide-react'
 import { requestCode, searchUsers, type UserHit } from '../lib/auth'
 
 interface Props {
   onSent: (email: string) => void
 }
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 export default function LoginEmail({ onSent }: Props) {
   const [q, setQ] = useState('')
@@ -12,17 +14,13 @@ export default function LoginEmail({ onSent }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Liste des emails autorisés, filtrée au fil de la frappe (vide = tous).
   useEffect(() => {
-    const s = q.trim()
-    if (s.length < 2) {
-      setHits([])
-      return
-    }
     let alive = true
     const t = setTimeout(async () => {
-      const r = await searchUsers(s)
+      const r = await searchUsers(q.trim())
       if (alive) setHits(r)
-    }, 200)
+    }, 150)
     return () => {
       alive = false
       clearTimeout(t)
@@ -30,7 +28,7 @@ export default function LoginEmail({ onSent }: Props) {
   }, [q])
 
   async function send(email: string) {
-    if (busy) return
+    if (busy || !email) return
     setBusy(true)
     setError(null)
     const r = await requestCode(email)
@@ -42,16 +40,19 @@ export default function LoginEmail({ onSent }: Props) {
     if (r.error === 'unauthorized') setError("Cet email n'a pas accès à la dataroom.")
     else if (r.error === 'cooldown') setError(`Patientez ${r.retryIn ?? 20}s avant de redemander un code.`)
     else if (r.error === 'send_failed') setError("Impossible d'envoyer l'email. Réessayez plus tard.")
+    else if (r.error === 'notion') setError("Connexion à Notion impossible (intégration partagée ?).")
     else setError('Une erreur est survenue.')
   }
+
+  const typedValid = EMAIL_RE.test(q.trim())
+  const target = typedValid ? q.trim() : hits.length === 1 ? hits[0].email : ''
+  const canSubmit = !!target && !busy
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        const exact = hits.find((h) => h.email.toLowerCase() === q.trim().toLowerCase())
-        if (exact) send(exact.email)
-        else if (hits.length === 1) send(hits[0].email)
+        if (target) send(target)
       }}
       className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
@@ -77,7 +78,7 @@ export default function LoginEmail({ onSent }: Props) {
       </div>
 
       {hits.length > 0 && (
-        <ul className="mt-3 divide-y divide-gray-100 overflow-hidden rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
+        <ul className="mt-3 max-h-56 divide-y divide-gray-100 overflow-y-auto rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
           {hits.map((h) => (
             <li key={h.email}>
               <button
@@ -101,20 +102,27 @@ export default function LoginEmail({ onSent }: Props) {
         </ul>
       )}
 
-      {busy && (
-        <p className="mt-3 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <LoaderCircle className="h-4 w-4 animate-spin" />
-          Envoi du code…
-        </p>
-      )}
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+          canSubmit
+            ? 'bg-gray-900 text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
+            : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
+        }`}
+      >
+        {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        Recevoir mon code
+      </button>
+
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
 
-      <p className="mt-5 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
-        Seuls les emails autorisés peuvent accéder au dossier. Commencez à taper pour retrouver le vôtre.
+      <p className="mt-4 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+        Seuls les emails autorisés peuvent accéder au dossier.
       </p>
     </form>
   )

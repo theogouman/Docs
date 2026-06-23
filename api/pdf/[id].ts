@@ -14,11 +14,42 @@
 
 export const config = { maxDuration: 60 }
 
-import { authConfigured, sessionEmail } from '../../server/auth'
+import crypto from 'crypto'
 
 const SPACE_ID = '044d7f69-a713-4bfa-a4e4-53a306821dcf'
 const NOTION_VERSION = '2022-06-28'
 const CACHE_TTL_MS = 45 * 60 * 1000
+
+// ---- Auth (inliné : aucun import local pour un bundling ESM fiable) ----
+const AUTH_SECRET = process.env.AUTH_SECRET || ''
+function authConfigured(): boolean {
+  return Boolean(process.env.NOTION_TOKEN && process.env.AUTH_SECRET)
+}
+function sessionEmail(req: any): string | null {
+  if (!AUTH_SECRET) return null
+  const header: string = req?.headers?.cookie || ''
+  let token = ''
+  for (const part of header.split(';')) {
+    const idx = part.indexOf('=')
+    if (idx > 0 && part.slice(0, idx).trim() === 'session') token = decodeURIComponent(part.slice(idx + 1).trim())
+  }
+  if (!token) return null
+  const i = token.lastIndexOf('.')
+  if (i < 0) return null
+  const body = token.slice(0, i)
+  const mac = token.slice(i + 1)
+  const expected = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url')
+  const ab = Buffer.from(mac)
+  const bb = Buffer.from(expected)
+  if (ab.length !== bb.length || !crypto.timingSafeEqual(ab, bb)) return null
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'))
+    if (payload?.exp && Date.now() > payload.exp) return null
+    return payload?.email ?? null
+  } catch {
+    return null
+  }
+}
 
 type Json = any
 

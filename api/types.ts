@@ -8,9 +8,32 @@
 // (la base est publiée publiquement). Mise en cache courte (~60 s) pour rester
 // « live » sans marteler Notion.
 
-import documents from '../src/data/documents.json'
-
 export const config = { maxDuration: 30 }
+
+// IDs des pages Documents (inliné : pas d'import JSON sous ESM sur Vercel).
+const DOC_IDS: string[] = [
+  '388bad05-6a95-81ca-b2be-cb32ce2ac9a2',
+  '387bad05-6a95-81da-9ae3-eaa8b7459abd',
+  '388bad05-6a95-81b1-9bd9-f1545566bb50',
+  '388bad05-6a95-8122-bdfb-fdc7147414d6',
+  '388bad05-6a95-81cb-9b25-c2ea6b0b6a9f',
+  '388bad05-6a95-81a7-ba62-f82cd1994fc4',
+  '388bad05-6a95-8181-ae40-d300d8089323',
+  '388bad05-6a95-8103-be1d-deb06f8a99b9',
+  '388bad05-6a95-81df-813d-edf5c35892d2',
+  '388bad05-6a95-81d1-b424-c521806f9fbc',
+  '388bad05-6a95-8101-a047-e01182b1cc03',
+  '388bad05-6a95-81e5-ab63-cbca536eefbf',
+  '388bad05-6a95-81eb-84f3-d15906e769c7',
+  '388bad05-6a95-81b1-848c-dceba4398478',
+  '388bad05-6a95-81e1-bf29-f802f8a1c94f',
+  '388bad05-6a95-8150-80fa-fa919333a54c',
+  '388bad05-6a95-8124-b940-eb8c3f913469',
+  '388bad05-6a95-816f-8b01-cf57383c9b42',
+  '388bad05-6a95-81f9-86fb-f9dfefde23ed',
+  '388bad05-6a95-81c2-85f3-c544c291f143',
+  '388bad05-6a95-81a0-b602-d921884d3788',
+]
 
 const COLLECTION_ID = '387bad05-6a95-800d-8ae6-000b8759702e'
 const DATABASE_ID = '387bad05-6a95-80a6-85ec-d4981181fac0'
@@ -28,7 +51,7 @@ function dashify(id: string): string {
   return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20)}`
 }
 
-const IDS: string[] = (documents as Json[]).map((d) => dashify(d.notionId))
+const IDS: string[] = DOC_IDS.map(dashify)
 
 /** API officielle : schéma (options du select) + lignes (id -> Type). */
 async function viaToken(token: string) {
