@@ -95,7 +95,7 @@ export default function DetailPanel({ doc, onClose }: Props) {
 
         <div className="flex-1 overflow-y-auto p-5">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Résumé</h3>
-          <p className="mt-2 text-sm leading-relaxed text-gray-700">{current.summary}</p>
+          <p className="mt-2 text-sm font-normal leading-relaxed text-gray-700">{current.summary}</p>
 
           <div className="mt-5">
             {showPreview ? (

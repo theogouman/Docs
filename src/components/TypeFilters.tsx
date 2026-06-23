@@ -9,7 +9,11 @@ interface Props {
 
 export default function TypeFilters({ counts, selected, onToggle, onClear }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label="Filtrer par type">
+    <div
+      className="no-scrollbar -mx-4 flex items-center gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
+      role="group"
+      aria-label="Filtrer par type"
+    >
       {TYPE_ORDER.map((type) => {
         const isOn = selected.has(type)
         const style = TYPE_STYLES[type]
@@ -19,7 +23,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
             type="button"
             onClick={() => onToggle(type)}
             aria-pressed={isOn}
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-[0.97] ${
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-[0.97] ${
               isOn
                 ? 'border-gray-900 bg-gray-900 text-white shadow'
                 : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400 hover:bg-gray-50'
@@ -44,7 +48,7 @@ export default function TypeFilters({ counts, selected, onToggle, onClear }: Pro
         <button
           type="button"
           onClick={onClear}
-          className="ml-1 rounded-full px-3 py-2 text-sm font-medium text-gray-500 underline-offset-2 transition hover:text-gray-900 hover:underline"
+          className="ml-1 shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-gray-500 underline-offset-2 transition hover:text-gray-900 hover:underline"
         >
           Tout effacer
         </button>

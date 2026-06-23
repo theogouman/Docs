@@ -20,6 +20,25 @@
 
 html {
   scroll-behavior: smooth;
+  /* Empêche l'agrandissement automatique des polices (« font boosting »)
+     de Chrome mobile, qui faisait apparaître tout le texte en gras / zoomé. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* Pas de débordement horizontal -> la page se charge à la bonne largeur
+     sur mobile (plus de « zoom » initial). */
+  overflow-x: hidden;
+}
+
+/* Masque la barre de défilement (filtres en ligne sur mobile). */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Focus visible net pour la navigation clavier (accessibilité). */

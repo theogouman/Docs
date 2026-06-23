@@ -17,6 +17,7 @@ import DocumentCard from './components/DocumentCard'
 import DocumentTable from './components/DocumentTable'
 import DetailPanel from './components/DetailPanel'
 import ZipButton from './components/ZipButton'
+import CategorySection from './components/CategorySection'
 
 const DOCUMENTS = rawDocuments as DocItem[]
 const TOTAL = DOCUMENTS.length
@@ -81,7 +82,7 @@ export default function App() {
 
   return (
     <PasswordGate>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-blue-50">
         <Header />
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -121,23 +122,15 @@ export default function App() {
             ) : view === 'table' ? (
               <DocumentTable docs={flat} onOpenDetail={setDetail} />
             ) : groups ? (
-              <div className="space-y-8">
+              <div className="space-y-4">
                 {groups.map((group) => (
-                  <section key={group.type}>
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-                        {group.type}
-                        <span className="ml-2 font-normal text-gray-400">{group.docs.length}</span>
-                      </h2>
-                      <ZipButton
-                        docs={group.docs}
-                        zipName={`fenouillet-${slug(group.type)}.zip`}
-                        label="Télécharger"
-                        className="border border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
-                      />
-                    </div>
-                    {renderCards(group.docs)}
-                  </section>
+                  <CategorySection
+                    key={group.type}
+                    type={group.type}
+                    docs={group.docs}
+                    zipName={`fenouillet-${slug(group.type)}.zip`}
+                    onOpenDetail={setDetail}
+                  />
                 ))}
               </div>
             ) : (
