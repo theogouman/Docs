@@ -80,10 +80,7 @@ export default function LoginCode({ email, onBack, onSuccess }: Props) {
         </p>
       )}
 
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-        <div className="flex-1">
-          <MailDropdown />
-        </div>
+      <div className="mt-6 flex items-center gap-3">
         <button
           type="button"
           onClick={resend}
@@ -101,6 +98,7 @@ export default function LoginCode({ email, onBack, onSuccess }: Props) {
           )}
           {seconds > 0 ? `Renvoyer un code (${seconds}s)` : 'Renvoyer un code'}
         </button>
+        <MailDropdown />
       </div>
 
       <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
