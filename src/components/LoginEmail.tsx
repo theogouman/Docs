@@ -158,7 +158,7 @@ export default function LoginEmail({ onSent }: Props) {
             }}
             placeholder="vous@exemple.com"
             aria-label="Adresse email"
-            className="w-full bg-transparent py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="w-full bg-transparent py-2.5 pl-10 pr-3 text-base text-gray-900 outline-none dark:text-gray-100 dark:placeholder:text-gray-500 sm:text-sm"
           />
         </div>
 

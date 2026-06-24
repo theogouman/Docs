@@ -22,6 +22,8 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const [height, setHeight] = useState<number | undefined>(undefined)
 
   useEffect(() => {
+    // On gère nous-mêmes le scroll : pas de restauration auto au rechargement.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
     let alive = true
     fetchMe().then((me) => {
       if (!alive) return
@@ -37,6 +39,12 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const onLogin = phase === 'email' || phase === 'code'
   const dataPage = phase === 'code' ? '2' : '1'
 
+  // On garde l'affichage en haut à l'arrivée sur la dataroom / le login
+  // (sinon, sur mobile, il faut remonter pour voir le logo La Relève).
+  useEffect(() => {
+    if (phase === 'authed' || phase === 'email') window.scrollTo(0, 0)
+  }, [phase])
+
   // Le conteneur prend la hauteur de la page active (transition douce) et
   // suit les changements de taille (ex. liste d'emails qui se déplie).
   useLayoutEffect(() => {
@@ -50,10 +58,13 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     return () => ro.disconnect()
   }, [onLogin, dataPage])
 
-  // On place le focus sur la 1re case du code en arrivant sur la page « code ».
-  // (On ne focalise PAS l'email au départ, sinon sa liste se déplierait seule.)
+  // Focus sur la 1re case du code en arrivant sur la page « code », mais
+  // seulement sur desktop : sur mobile on n'ouvre pas le clavier automatiquement
+  // (sinon l'affichage saute), et on évite le scroll au focus avec preventScroll.
   useEffect(() => {
-    if (onLogin && dataPage === '2') page2Ref.current?.querySelector('input')?.focus()
+    if (!onLogin || dataPage !== '2') return
+    if (!window.matchMedia('(min-width: 640px)').matches) return
+    page2Ref.current?.querySelector('input')?.focus({ preventScroll: true })
   }, [onLogin, dataPage])
 
   if (phase === 'loading') {
