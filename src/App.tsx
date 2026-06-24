@@ -28,6 +28,17 @@ interface LiveTypes {
   map: Record<string, string>
 }
 
+interface LiveDoc {
+  notionId: string
+  name: string
+  type: string
+  summary: string
+  file: string
+  created: string
+}
+
+const STATIC_BY_NOTION = new Map(DOCUMENTS.map((d) => [d.notionId, d]))
+
 export default function App() {
   const [query, setQuery] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
@@ -36,30 +47,62 @@ export default function App() {
   const [view, setView] = useState<ViewMode>('cards')
   const [detail, setDetail] = useState<DocItem | null>(null)
   const [stakeholdersOpen, setStakeholdersOpen] = useState(false)
-  // Catégories « Type » récupérées en live depuis Notion (repli statique).
+  // Catégories « Type » et liste des documents récupérées EN LIVE depuis Notion
+  // (repli statique si indisponible). Rechargées au retour sur l'onglet.
   const [live, setLive] = useState<LiveTypes | null>(null)
+  const [liveDocs, setLiveDocs] = useState<LiveDoc[] | null>(null)
 
   useEffect(() => {
     let alive = true
-    fetch(`${import.meta.env.BASE_URL}api/types`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (alive && d && Array.isArray(d.order) && d.order.length) setLive(d)
-      })
-      .catch(() => {})
+    const base = import.meta.env.BASE_URL
+    const load = () => {
+      fetch(`${base}api/types`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (alive && d && Array.isArray(d.order) && d.order.length) setLive(d)
+        })
+        .catch(() => {})
+      fetch(`${base}api/documents`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (alive && d && Array.isArray(d.documents) && d.documents.length) setLiveDocs(d.documents)
+        })
+        .catch(() => {})
+    }
+    load()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       alive = false
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [])
 
   const categoriesAll = live?.order?.length ? live.order : FALLBACK_CATEGORIES
   const typeMap = live?.map
 
-  // Chaque document reçoit son Type LIVE (repli sur le type statique).
-  const docs = useMemo(
-    () => DOCUMENTS.map((d) => ({ ...d, type: typeMap?.[d.notionId] ?? d.type })),
-    [typeMap],
-  )
+  // Liste des documents : live (Notion) fusionnée avec le statique curaté
+  // (les docs connus gardent résumé/date/fichier curatés ; les nouveaux docs
+  // apparaissent), sinon repli sur le statique seul. Type toujours live.
+  const docs = useMemo(() => {
+    if (liveDocs && liveDocs.length) {
+      return liveDocs.map((ld) => {
+        const s = STATIC_BY_NOTION.get(ld.notionId)
+        return {
+          id: s?.id ?? ld.notionId,
+          notionId: ld.notionId,
+          name: ld.name || s?.name || 'Document',
+          type: ld.type || typeMap?.[ld.notionId] || s?.type || '',
+          date: s?.date || (ld.created ? ld.created.slice(0, 10) : ''),
+          file: s?.file || ld.file || `${s?.id ?? ld.notionId}.pdf`,
+          summary: ld.summary || s?.summary || '',
+        } as DocItem
+      })
+    }
+    return DOCUMENTS.map((d) => ({ ...d, type: typeMap?.[d.notionId] ?? d.type }))
+  }, [liveDocs, typeMap])
 
   // Couleur d'un nom de type (live), repli gris si inconnu.
   const colorFor = useMemo(() => {
@@ -78,7 +121,7 @@ export default function App() {
   // Ordre des catégories : celui de Notion, + tout type présent hors schéma.
   const orderedTypeNames = useMemo(() => {
     const names = categoriesAll.map((c) => c.name)
-    for (const d of docs) if (!names.includes(d.type)) names.push(d.type)
+    for (const d of docs) if (d.type && !names.includes(d.type)) names.push(d.type)
     return names
   }, [categoriesAll, docs])
 

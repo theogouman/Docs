@@ -22,15 +22,28 @@ export default function OtpInput({ value, onChange, onComplete, disabled, error 
     return next
   }
 
+  // Répartit une suite de chiffres à partir de la case `start`
+  // (saisie normale, collage, ou autofill iOS qui livre tout le code d'un coup).
+  function fill(start: number, digits: string): void {
+    const arr = Array.from({ length: LEN }, (_, k) => value[k] ?? '')
+    let idx = start
+    for (const ch of digits) {
+      if (idx >= LEN) break
+      arr[idx++] = ch
+    }
+    const next = arr.join('')
+    onChange(next)
+    refs.current[Math.min(idx, LEN - 1)]?.focus()
+    if (/^\d{5}$/.test(next)) onComplete?.(next)
+  }
+
   function handleChange(i: number, raw: string) {
-    const d = raw.replace(/\D/g, '')
-    if (!d) {
+    const digits = raw.replace(/\D/g, '')
+    if (!digits) {
       setAt(i, '')
       return
     }
-    const next = setAt(i, d[d.length - 1])
-    if (i < LEN - 1) refs.current[i + 1]?.focus()
-    if (/^\d{5}$/.test(next)) onComplete?.(next)
+    fill(i, digits)
   }
 
   function handleKey(i: number, e: KeyboardEvent<HTMLInputElement>) {
@@ -48,9 +61,7 @@ export default function OtpInput({ value, onChange, onComplete, disabled, error 
     const d = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, LEN)
     if (!d) return
     e.preventDefault()
-    onChange(d)
-    refs.current[Math.min(d.length, LEN - 1)]?.focus()
-    if (d.length === LEN) onComplete?.(d)
+    fill(0, d)
   }
 
   return (
@@ -63,7 +74,6 @@ export default function OtpInput({ value, onChange, onComplete, disabled, error 
           }}
           inputMode="numeric"
           autoComplete="one-time-code"
-          maxLength={1}
           value={value[i] ?? ''}
           disabled={disabled}
           onChange={(e) => handleChange(i, e.target.value)}
