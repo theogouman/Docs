@@ -11,13 +11,10 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl items-start justify-between gap-4 px-4 py-6 sm:px-6 sm:py-8">
         <div>
           <Logo className="h-6 sm:h-7" />
-          <h1 className="mt-3 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl">
-            Dataroom - Vente SAS La Relève Hyères / Maley
-          </h1>
           <button
             type="button"
             onClick={() => setStakeholdersOpen(true)}
-            className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-gray-500 underline-offset-4 transition hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Voir les parties prenantes de cette vente
             <span aria-hidden="true">→</span>

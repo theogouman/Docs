@@ -133,9 +133,9 @@ export default function LoginEmail({ onSent }: Props) {
       }}
       className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
-      <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Accès à la dataroom</h1>
+      <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Qui se connecte à la dataroom ?</h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Saisissez votre adresse email pour recevoir un code à 5 chiffres.
+        Saisissez votre adresse email pour recevoir votre code de connexion
       </p>
 
       {/* Bloc unifié : le champ et la liste partagent la même bordure. */}

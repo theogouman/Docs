@@ -1,7 +1,6 @@
 import type { KeyboardEvent } from 'react'
 import type { DocItem } from '../lib/types'
 import { formatDate } from '../lib/format'
-import Badge from './Badge'
 import DocActions from './DocActions'
 
 interface Props {
@@ -28,16 +27,13 @@ export default function DocumentCard({ doc, onOpenDetail, index = 0 }: Props) {
       className="t-reveal group flex h-full cursor-pointer flex-col rounded-xl border border-white/70 bg-white/80 p-5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10"
       style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <Badge type={doc.type} />
-        {doc.date && (
-          <time className="shrink-0 text-xs text-gray-400" dateTime={doc.date}>
-            {formatDate(doc.date)}
-          </time>
-        )}
-      </div>
+      {doc.date && (
+        <time className="block text-xs text-gray-400" dateTime={doc.date}>
+          {formatDate(doc.date)}
+        </time>
+      )}
 
-      <h3 className="mt-3 text-base font-semibold leading-snug text-gray-900 dark:text-gray-100">
+      <h3 className="mt-2 text-base font-semibold leading-snug text-gray-900 dark:text-gray-100">
         {doc.name}
       </h3>
 

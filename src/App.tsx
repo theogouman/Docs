@@ -142,6 +142,9 @@ export default function App() {
           <Header />
 
           <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+            <h1 className="mb-5 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl">
+              Dataroom - Vente SAS La Relève Hyères / Maley
+            </h1>
             <div className="space-y-4">
               <SearchBar value={query} onChange={setQuery} />
               <TypeFilters
