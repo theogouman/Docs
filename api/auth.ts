@@ -122,17 +122,20 @@ async function napi(path: string, init: Json = {}): Promise<Response> {
   })
 }
 
-interface UserRow {
-  pageId: string
+// Une « personne » = un ou plusieurs comptes Users reliés par « Other Email ».
+interface Person {
   name: string
-  email: string
+  emails: string[] // adresses de connexion possibles (sans doublon)
+  pageIdByEmail: Record<string, string> // email (minuscule) -> page Notion propriétaire
 }
-let usersCache: { at: number; list: UserRow[] } | null = null
+let peopleCache: { at: number; list: Person[] } | null = null
 
-async function getUsers(): Promise<UserRow[]> {
+async function getPeople(): Promise<Person[]> {
   const now = Date.now()
-  if (usersCache && now - usersCache.at < 60000) return usersCache.list
-  const list: UserRow[] = []
+  if (peopleCache && now - peopleCache.at < 60000) return peopleCache.list
+
+  // 1. Lecture brute de toutes les pages Users (email, nom, relation « Other Email »).
+  const pages: { id: string; email: string; name: string; rel: string[] }[] = []
   let cursor: string | undefined
   do {
     const r = await napi(`databases/${USERS_DB()}/query`, {
@@ -144,29 +147,83 @@ async function getUsers(): Promise<UserRow[]> {
     for (const pg of j.results ?? []) {
       const email = pg?.properties?.Email?.email
       const name = (pg?.properties?.Name?.title ?? []).map((t: Json) => t.plain_text).join('')
-      if (email) list.push({ pageId: pg.id, name: name || '', email: String(email) })
+      const relProp = pg?.properties?.['Other Email']
+      const rel = Array.isArray(relProp?.relation) ? relProp.relation.map((x: Json) => x.id) : []
+      pages.push({ id: pg.id, email: email ? String(email) : '', name: name || '', rel })
     }
     cursor = j.has_more ? j.next_cursor : undefined
   } while (cursor)
-  const seen = new Set<string>()
-  const deduped = list.filter((u) => {
-    const k = u.email.toLowerCase().trim()
-    if (seen.has(k)) return false
-    seen.add(k)
-    return true
-  })
-  usersCache = { at: now, list: deduped }
-  return deduped
+
+  // 2. Union-find : on fusionne les pages reliées entre elles.
+  const parent: Record<string, string> = {}
+  const find = (x: string): string => {
+    while (parent[x] !== undefined && parent[x] !== x) {
+      parent[x] = parent[parent[x]]
+      x = parent[x]
+    }
+    return x
+  }
+  for (const p of pages) parent[p.id] = p.id
+  for (const p of pages) {
+    for (const r of p.rel) {
+      if (parent[r] === undefined) continue
+      parent[find(p.id)] = find(r)
+    }
+  }
+
+  // 3. Regroupement par composante connexe.
+  const groups = new Map<string, typeof pages>()
+  for (const p of pages) {
+    const root = find(p.id)
+    const arr = groups.get(root) ?? []
+    arr.push(p)
+    groups.set(root, arr)
+  }
+
+  // 4. Construction des personnes (emails dédupliqués, premier nom non vide).
+  const list: Person[] = []
+  for (const members of groups.values()) {
+    const pageIdByEmail: Record<string, string> = {}
+    const emails: string[] = []
+    let name = ''
+    for (const m of members) {
+      const e = m.email.trim()
+      if (e) {
+        const key = e.toLowerCase()
+        if (!(key in pageIdByEmail)) {
+          pageIdByEmail[key] = m.id
+          emails.push(e)
+        }
+      }
+      if (!name && m.name) name = m.name
+    }
+    if (emails.length) list.push({ name, emails, pageIdByEmail })
+  }
+
+  peopleCache = { at: now, list }
+  return list
 }
-async function findUser(email: string): Promise<UserRow | null> {
+
+interface FoundUser {
+  pageId: string | null
+  name: string
+  email: string
+}
+async function findUser(email: string): Promise<FoundUser | null> {
   const e = email.toLowerCase().trim()
-  return (await getUsers()).find((u) => u.email.toLowerCase().trim() === e) ?? null
+  for (const person of await getPeople()) {
+    if (person.pageIdByEmail[e]) return { pageId: person.pageIdByEmail[e], name: person.name, email }
+  }
+  return null
 }
-async function searchUsers(q: string): Promise<{ email: string; name: string }[]> {
+async function searchUsers(q: string): Promise<{ name: string; emails: string[] }[]> {
   const s = q.toLowerCase().trim()
-  const list = await getUsers()
-  const base = s.length < 1 ? list : list.filter((u) => u.email.toLowerCase().includes(s) || u.name.toLowerCase().includes(s))
-  return base.slice(0, 12).map((u) => ({ email: u.email, name: u.name }))
+  const list = await getPeople()
+  const base =
+    s.length < 1
+      ? list
+      : list.filter((p) => p.name.toLowerCase().includes(s) || p.emails.some((e) => e.toLowerCase().includes(s)))
+  return base.slice(0, 100).map((p) => ({ name: p.name, emails: p.emails }))
 }
 function parisDateTime(): string {
   const fmt = new Intl.DateTimeFormat('sv-SE', {
@@ -188,7 +245,7 @@ async function createLog(action: string, email: string, label?: string): Promise
     Action: { select: { name: action } },
     Date: { date: { start: parisDateTime(), time_zone: 'Europe/Paris' } },
   }
-  if (user) properties.User = { relation: [{ id: user.pageId }] }
+  if (user && user.pageId) properties.User = { relation: [{ id: user.pageId }] }
   const r = await napi('pages', {
     method: 'POST',
     body: JSON.stringify({ parent: { database_id: LOGS_DB() }, properties }),
@@ -251,7 +308,7 @@ async function actRequestCode(req: Json, res: Json) {
   const body = await readBody(req)
   const email = String(body?.email ?? '').toLowerCase().trim()
   if (!email) return json(res, 400, { ok: false, error: 'email manquant' })
-  let user: UserRow | null = null
+  let user: FoundUser | null = null
   try {
     user = await findUser(email)
   } catch (e: Json) {

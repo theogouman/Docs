@@ -58,6 +58,15 @@ export default function LoginCode({ email, onBack, onSuccess }: Props) {
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-7 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <img
+        src={`${import.meta.env.BASE_URL}anim/key.webp`}
+        alt=""
+        aria-hidden="true"
+        width={72}
+        height={72}
+        className="mx-auto mb-2 h-16 w-16 select-none"
+        draggable={false}
+      />
       <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Saisissez votre code</h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         Un code à 5 chiffres a été envoyé à<br />

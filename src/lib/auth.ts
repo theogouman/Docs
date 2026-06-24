@@ -4,8 +4,8 @@ export interface MeResp {
   email?: string
 }
 export interface UserHit {
-  email: string
   name: string
+  emails: string[]
 }
 
 const API = `${import.meta.env.BASE_URL}api/auth`
