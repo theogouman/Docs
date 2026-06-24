@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import type { DocItem } from '../lib/types'
 import { formatDate } from '../lib/format'
-import { pdfUrl } from '../lib/pdf'
 import { useModalState } from '../lib/useModalState'
 import Badge from './Badge'
 import DocActions from './DocActions'
+import PdfView from './PdfView'
 
 interface Props {
   doc: DocItem | null
@@ -28,7 +28,7 @@ export default function DetailPanel({ doc, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+      className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-title"
@@ -39,9 +39,12 @@ export default function DetailPanel({ doc, onClose }: Props) {
         aria-hidden="true"
       />
 
-      <div
-        className={`relative z-10 flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state} dark:bg-gray-900 dark:ring-1 dark:ring-white/10 md:h-[90vh] md:flex-row`}
-      >
+      {/* Centrage dans la zone réellement visible (100svh) pour des marges
+          haut/bas régulières sur mobile. */}
+      <div className="absolute inset-x-0 top-0 flex h-[100svh] items-center justify-center p-3 sm:p-6">
+        <div
+          className={`relative z-10 flex h-[85svh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl t-modal ${state} dark:bg-gray-900 dark:ring-1 dark:ring-white/10 md:h-[90svh] md:flex-row`}
+        >
         <button
           type="button"
           onClick={onClose}
@@ -80,13 +83,10 @@ export default function DetailPanel({ doc, onClose }: Props) {
           </div>
         </div>
 
-        {/* Colonne droite : PDF chargé directement */}
+        {/* Colonne droite : PDF rendu par pdf.js (calé sur la largeur) */}
         <div className="relative min-h-0 flex-1 bg-gray-100 dark:bg-gray-950">
-          <iframe
-            src={`${pdfUrl(current)}#toolbar=1&navpanes=0&statusbar=0&view=FitH&pagemode=none`}
-            title={`Aperçu : ${current.name}`}
-            className="h-full w-full border-0"
-          />
+          <PdfView doc={current} />
+        </div>
         </div>
       </div>
     </div>
