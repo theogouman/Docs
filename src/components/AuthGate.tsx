@@ -108,6 +108,14 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           </div>
         </section>
       </div>
+
+      {/* Identité de l'exploitant : rassure les destinataires et atteste de la
+          légitimité de l'espace (utile face aux faux positifs anti-phishing). */}
+      <p className="max-w-md px-2 text-center text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+        Espace documentaire privé — Vente SAS La Relève Hyères / Maley.
+        <br />
+        Administré par Théo Gouman · theo@gouman.fr · Accès réservé aux parties autorisées.
+      </p>
     </div>
   )
 }
