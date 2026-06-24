@@ -69,7 +69,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
 
   if (phase === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="flex min-h-[100svh] items-center justify-center bg-gray-50 dark:bg-gray-950">
         <LoaderCircle className="h-6 w-6 animate-spin text-gray-400" />
       </div>
     )
@@ -79,7 +79,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   if (phase === 'authed') return <>{children}</>
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-7 bg-gray-50 px-4 py-10 dark:bg-gray-950">
+    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-6 bg-gray-50 px-4 py-6 dark:bg-gray-950">
       <Logo className="h-9" />
 
       <div

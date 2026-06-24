@@ -169,7 +169,7 @@ export default function LoginEmail({ onSent }: Props) {
           }`}
         >
           <div className="overflow-hidden">
-            <ul className="max-h-64 divide-y divide-gray-100 overflow-y-auto border-t border-gray-100 dark:divide-gray-700/60 dark:border-gray-700/60">
+            <ul className="max-h-[40svh] divide-y divide-gray-100 overflow-y-auto border-t border-gray-100 dark:divide-gray-700/60 dark:border-gray-700/60 sm:max-h-64">
               {loading && <li className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">Chargement…</li>}
               {!loading && filtered.length === 0 && (
                 <li className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">Aucun utilisateur trouvé</li>
