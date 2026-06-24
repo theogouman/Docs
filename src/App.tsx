@@ -161,7 +161,7 @@ export default function App() {
                     zipName="dossier-fenouillet.zip"
                     label="Tout télécharger"
                     foldersByType
-                    className="bg-gray-900 text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+                    className="bg-gray-700 text-white hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100"
                   />
                 }
               />

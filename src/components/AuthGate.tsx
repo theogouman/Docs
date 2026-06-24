@@ -69,7 +69,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-7 bg-gray-50 px-4 py-10 dark:bg-gray-950">
-      <Logo className="h-8 w-auto text-gray-900 dark:text-white" />
+      <Logo className="h-9" />
 
       <div
         className="t-page-slide w-full max-w-md transition-[height] duration-300 ease-out"

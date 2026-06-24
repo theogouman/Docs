@@ -8,13 +8,15 @@ interface Props {
   size?: 'sm' | 'md'
   /** « compact » = boutons icône seule (vue Tableau, plus épuré). */
   variant?: 'default' | 'compact'
+  /** Affiche le bouton « Ouvrir » (masqué sur les cartes, qui ouvrent déjà l'aperçu). */
+  showOpen?: boolean
 }
 
 /**
  * Boutons « Ouvrir » (nouvel onglet) et « Télécharger ».
  * Le PDF n'est résolu/chargé qu'au clic (aucun préchargement).
  */
-export default function DocActions({ doc, size = 'sm', variant = 'default' }: Props) {
+export default function DocActions({ doc, size = 'sm', variant = 'default', showOpen = true }: Props) {
   const url = pdfUrl(doc)
   const dl = pdfDownloadUrl(doc)
 
@@ -57,17 +59,19 @@ export default function DocActions({ doc, size = 'sm', variant = 'default' }: Pr
   const pad = size === 'md' ? 'px-3.5 py-2 text-sm' : 'px-3 py-1.5 text-xs'
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onOpen}
-        aria-label={`Ouvrir le PDF : ${doc.name}`}
-        className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-900 font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white ${pad}`}
-      >
-        <ExternalLink className="h-4 w-4" />
-        Ouvrir
-      </a>
+      {showOpen && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onOpen}
+          aria-label={`Ouvrir le PDF : ${doc.name}`}
+          className={`inline-flex items-center gap-1.5 rounded-lg bg-gray-700 font-medium text-white transition hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100 ${pad}`}
+        >
+          <ExternalLink className="h-4 w-4" />
+          Ouvrir
+        </a>
+      )}
       <a
         href={dl}
         onClick={onDownload}

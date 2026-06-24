@@ -27,7 +27,7 @@ export default function TypeFilters({ categories, selected, onToggle, onClear }:
             aria-pressed={isOn}
             className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition active:scale-[0.97] ${
               isOn
-                ? 'border-gray-900 bg-gray-900 text-white shadow dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
+                ? 'border-gray-700 bg-gray-700 text-white shadow dark:border-gray-200 dark:bg-gray-200 dark:text-gray-900'
                 : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-700'
             }`}
           >

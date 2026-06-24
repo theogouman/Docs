@@ -47,7 +47,7 @@ export default function DocumentCard({ doc, onOpenDetail, index = 0 }: Props) {
 
       <div className="mt-4 flex-1" />
       <div className="pt-1">
-        <DocActions doc={doc} />
+        <DocActions doc={doc} showOpen={false} />
       </div>
     </article>
   )

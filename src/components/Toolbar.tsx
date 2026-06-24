@@ -34,7 +34,7 @@ export default function Toolbar({ count, view, onView, leadingAction }: Props) {
           aria-pressed={view === 'cards'}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition ${
             view === 'cards'
-              ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+              ? 'bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-900'
               : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           }`}
         >
@@ -47,7 +47,7 @@ export default function Toolbar({ count, view, onView, leadingAction }: Props) {
           aria-pressed={view === 'table'}
           className={`inline-flex items-center gap-1.5 border-l border-gray-300 px-3 py-1.5 text-sm font-medium transition dark:border-gray-700 ${
             view === 'table'
-              ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+              ? 'bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-900'
               : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           }`}
         >

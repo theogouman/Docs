@@ -70,7 +70,7 @@ export default function PasswordGate({ children }: { children: ReactNode }) {
         )}
         <button
           type="submit"
-          className="mt-5 w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+          className="mt-5 w-full rounded-lg bg-gray-700 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100"
         >
           Accéder au dossier
         </button>
