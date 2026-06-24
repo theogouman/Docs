@@ -2,6 +2,7 @@ export interface MeResp {
   configured: boolean
   authenticated: boolean
   email?: string
+  name?: string
 }
 export interface UserHit {
   name: string

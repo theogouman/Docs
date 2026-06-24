@@ -66,7 +66,6 @@ export default function OtpInput({ value, onChange, onComplete, disabled, error 
           maxLength={1}
           value={value[i] ?? ''}
           disabled={disabled}
-          autoFocus={i === 0}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKey(i, e)}
           onPaste={handlePaste}

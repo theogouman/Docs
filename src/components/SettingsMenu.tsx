@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LogOut, Moon, Settings, Sun } from 'lucide-react'
-import { logout } from '../lib/auth'
+import { fetchMe, logout } from '../lib/auth'
 
 type Theme = 'light' | 'dark'
 
@@ -18,9 +18,21 @@ export default function SettingsMenu() {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(currentTheme)
   const [busy, setBusy] = useState(false)
+  const [me, setMe] = useState<{ email?: string; name?: string }>({})
   const wrapRef = useRef<HTMLDivElement>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLSpanElement>(null)
+
+  // Identité de la session (pour « connecté en tant que … »).
+  useEffect(() => {
+    let alive = true
+    fetchMe().then((r) => {
+      if (alive && r.email) setMe({ email: r.email, name: r.name })
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   // Applique le thème et le mémorise.
   useEffect(() => {
@@ -103,6 +115,25 @@ export default function SettingsMenu() {
 
       {open && (
         <div className="absolute right-0 top-full z-30 mt-2 w-60 origin-top-right rounded-2xl border border-gray-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10">
+          {me.email && (
+            <>
+              <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                Vous êtes connecté en tant que{' '}
+                <span className="t-tt-wrap">
+                  <button
+                    type="button"
+                    className="t-tt-trigger cursor-default font-semibold text-gray-900 underline decoration-dotted underline-offset-2 dark:text-gray-100"
+                  >
+                    {me.name || me.email}
+                  </button>
+                  <span className="t-tt" role="tooltip">
+                    {me.email}
+                  </span>
+                </span>
+              </p>
+              <div className="mb-3 border-t border-gray-100 dark:border-gray-800" />
+            </>
+          )}
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
             Apparence
           </p>

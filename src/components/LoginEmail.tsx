@@ -70,7 +70,7 @@ export default function LoginEmail({ onSent }: Props) {
   // ---- Étape de confirmation : choisir l'adresse de réception du code ----
   if (choosing) {
     return (
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <button
           type="button"
           onClick={() => {
@@ -82,14 +82,11 @@ export default function LoginEmail({ onSent }: Props) {
           <ChevronLeft className="h-4 w-4" />
           Retour
         </button>
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Choisissez votre adresse</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          À quelle adresse dois-je envoyer le code ?
+        </h1>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {choosing.name ? (
-            <span className="font-medium text-gray-900 dark:text-gray-100">{choosing.name}</span>
-          ) : (
-            'Ce compte'
-          )}{' '}
-          dispose de plusieurs adresses. Où souhaitez-vous recevoir votre code ?
+          {choosing.emails.length} adresses mails sont enregistrées
         </p>
 
         <ul className="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
@@ -134,7 +131,7 @@ export default function LoginEmail({ onSent }: Props) {
         if (typedValid) send(typed)
         else if (filtered.length === 1) pick(filtered[0])
       }}
-      className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+      className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
       <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Accès à la dataroom</h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -152,7 +149,6 @@ export default function LoginEmail({ onSent }: Props) {
           <input
             ref={inputRef}
             type="email"
-            autoFocus
             value={q}
             onFocus={reveal}
             onChange={(e) => {

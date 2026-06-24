@@ -57,7 +57,7 @@ export default function LoginCode({ email, onBack, onSuccess }: Props) {
   const canResend = seconds <= 0 && !resending
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-7 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="w-full rounded-2xl border border-gray-200 bg-white p-7 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <img
         src={`${import.meta.env.BASE_URL}anim/key.webp`}
         alt=""

@@ -4,20 +4,21 @@ import type { ViewMode } from '../lib/types'
 
 interface Props {
   count: number
-  total: number
+  /** Total de documents (accepté pour compat. d'appel, plus affiché). */
+  total?: number
   view: ViewMode
   onView: (mode: ViewMode) => void
   /** Action optionnelle affichée à côté du compteur (ex. « Tout télécharger »). */
   leadingAction?: ReactNode
 }
 
-export default function Toolbar({ count, total, view, onView, leadingAction }: Props) {
+export default function Toolbar({ count, view, onView, leadingAction }: Props) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-sm text-gray-600 dark:text-gray-300" aria-live="polite">
           <span className="font-semibold text-gray-900 dark:text-gray-100">{count}</span> document
-          {count > 1 ? 's' : ''} sur {total}
+          {count > 1 ? 's' : ''}
         </p>
         {leadingAction}
       </div>

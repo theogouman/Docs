@@ -255,7 +255,7 @@ async function createLog(action: string, email: string, label?: string): Promise
 
 // ---- Email ----
 function emailHtml(code: string): string {
-  return `<!doctype html><html><body style="margin:0;background:#f5f5f5;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111"><div style="max-width:440px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #eee"><p style="margin:0 0 8px;font-size:14px;color:#555">Dataroom — Vente SAS La Relève Hyères / Maley</p><p style="margin:0 0 16px;font-size:15px">Votre code d'accès :</p><div style="font-size:34px;font-weight:700;letter-spacing:10px;text-align:center;padding:14px 0;background:#fafafa;border-radius:12px;border:1px solid #eee">${code}</div><p style="margin:16px 0 0;font-size:13px;color:#777">Ce code expire dans 10 minutes.</p></div></body></html>`
+  return `<!doctype html><html><body style="margin:0;background:#f5f5f5;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111"><div style="max-width:440px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #eee"><p style="margin:0 0 16px;font-size:15px;font-weight:600">Saisissez ce code pour accéder à la dataroom</p><div style="font-size:34px;font-weight:700;letter-spacing:10px;text-align:center;padding:14px 0;background:#fafafa;border-radius:12px;border:1px solid #eee;-webkit-user-select:all;user-select:all;cursor:pointer">${code}</div><p style="margin:12px 0 0;font-size:12px;color:#999;text-align:center">Appuyez longuement (mobile) ou double-cliquez (ordinateur) sur le code pour le copier.</p><p style="margin:16px 0 0;font-size:13px;color:#777">Ce code expire dans 10 minutes.</p></div></body></html>`
 }
 async function sendCode(to: string, code: string): Promise<void> {
   if (process.env.RESEND_API_KEY) {
@@ -292,7 +292,15 @@ const lastSent = new Map<string, number>()
 async function actMe(req: Json, res: Json) {
   if (!authConfigured()) return json(res, 200, { configured: false, authenticated: false })
   const email = verifyToken<{ email?: string }>(parseCookies(req).session)?.email
-  json(res, 200, { configured: true, authenticated: Boolean(email), email: email || undefined })
+  let name: string | undefined
+  if (email) {
+    try {
+      name = (await findUser(email))?.name || undefined
+    } catch {
+      /* best-effort : on renvoie au moins l'email */
+    }
+  }
+  json(res, 200, { configured: true, authenticated: Boolean(email), email: email || undefined, name })
 }
 async function actUsers(req: Json, res: Json) {
   if (!authConfigured()) return json(res, 200, { configured: false, results: [] })
