@@ -14,6 +14,7 @@ import DocumentTable from './components/DocumentTable'
 import DetailPanel from './components/DetailPanel'
 import ZipButton from './components/ZipButton'
 import CategorySection from './components/CategorySection'
+import StakeholdersModal from './components/StakeholdersModal'
 
 const DOCUMENTS = rawDocuments as DocItem[]
 const FALLBACK_CATEGORIES = rawCategories as Category[]
@@ -34,6 +35,7 @@ export default function App() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [view, setView] = useState<ViewMode>('cards')
   const [detail, setDetail] = useState<DocItem | null>(null)
+  const [stakeholdersOpen, setStakeholdersOpen] = useState(false)
   // Catégories « Type » récupérées en live depuis Notion (repli statique).
   const [live, setLive] = useState<LiveTypes | null>(null)
 
@@ -139,12 +141,22 @@ export default function App() {
     <AuthGate>
       <TypeColorContext.Provider value={colorFor}>
         <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
-          <Header />
+          <Header onOpenStakeholders={() => setStakeholdersOpen(true)} />
 
           <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-            <h1 className="mb-5 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl">
-              Dataroom - Vente SAS La Relève Hyères / Maley
-            </h1>
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl">
+                Dataroom - Vente SAS La Relève Hyères / Maley
+              </h1>
+              <button
+                type="button"
+                onClick={() => setStakeholdersOpen(true)}
+                className="hidden shrink-0 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white sm:inline-flex"
+              >
+                Voir les parties prenantes de cette vente
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
             <div className="space-y-4">
               <SearchBar value={query} onChange={setQuery} />
               <TypeFilters
@@ -223,6 +235,7 @@ export default function App() {
           </main>
 
           <DetailPanel doc={detail} onClose={() => setDetail(null)} />
+          <StakeholdersModal open={stakeholdersOpen} onClose={() => setStakeholdersOpen(false)} />
         </div>
       </TypeColorContext.Provider>
     </AuthGate>

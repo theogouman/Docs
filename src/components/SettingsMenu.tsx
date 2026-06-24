@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { LogOut, Moon, Settings, Sun } from 'lucide-react'
+import { LogOut, Moon, Settings, Sun, Users } from 'lucide-react'
 import { fetchMe, logout } from '../lib/auth'
+
+interface Props {
+  /** Ouvre le modal des parties prenantes (entrée affichée sur mobile uniquement). */
+  onOpenStakeholders: () => void
+}
 
 type Theme = 'light' | 'dark'
 
@@ -14,7 +19,7 @@ function currentTheme(): Theme {
  * (onglets glissants « Clair / Sombre », style transitions.dev) et où l'on
  * peut se déconnecter. Remplace l'ancien simple bouton jour/nuit.
  */
-export default function SettingsMenu() {
+export default function SettingsMenu({ onOpenStakeholders }: Props) {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(currentTheme)
   const [busy, setBusy] = useState(false)
@@ -134,6 +139,22 @@ export default function SettingsMenu() {
               <div className="mb-3 border-t border-gray-100 dark:border-gray-800" />
             </>
           )}
+          {/* Sur mobile, le bouton « parties prenantes » est regroupé ici. */}
+          <div className="mb-3 sm:hidden">
+            <button
+              type="button"
+              onClick={() => {
+                onOpenStakeholders()
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
+              <Users className="h-4 w-4" />
+              Voir les parties prenantes
+            </button>
+            <div className="mt-3 border-t border-gray-100 dark:border-gray-800" />
+          </div>
+
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
             Apparence
           </p>
