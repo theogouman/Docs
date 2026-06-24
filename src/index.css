@@ -268,6 +268,22 @@ body {
   pointer-events: auto;
 }
 
+/* Variante « filtre catégories » : bouton carré aligné sur la barre de
+   recherche qui se métamorphose en panneau (liste des catégories). Ancré en
+   haut à droite -> grandit vers le bas / la gauche. */
+.t-morph-filter {
+  width: 3rem;
+  height: 3rem;
+}
+.t-morph-filter .t-morph-plus {
+  width: 3rem;
+  height: 3rem;
+}
+.t-morph-filter[data-open='true'] {
+  width: 17rem;
+  height: 19rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .t-morph,
   .t-morph-plus,

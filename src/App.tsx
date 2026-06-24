@@ -8,7 +8,7 @@ import { logAction } from './lib/log'
 import AuthGate from './components/AuthGate'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
-import TypeFilters from './components/TypeFilters'
+import CategoryFilter from './components/CategoryFilter'
 import Toolbar from './components/Toolbar'
 import DocumentTable from './components/DocumentTable'
 import DetailPanel from './components/DetailPanel'
@@ -201,13 +201,17 @@ export default function App() {
               </button>
             </div>
             <div className="space-y-4">
-              <SearchBar value={query} onChange={setQuery} />
-              <TypeFilters
-                categories={filterCategories}
-                selected={selectedTypes}
-                onToggle={toggleFilter}
-                onClear={() => setSelectedTypes(new Set())}
-              />
+              <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <SearchBar value={query} onChange={setQuery} />
+                </div>
+                <CategoryFilter
+                  categories={filterCategories}
+                  selected={selectedTypes}
+                  onToggle={toggleFilter}
+                  onClear={() => setSelectedTypes(new Set())}
+                />
+              </div>
               <Toolbar
                 count={shownCount}
                 total={TOTAL}
@@ -219,6 +223,7 @@ export default function App() {
                     zipName="dossier-fenouillet.zip"
                     label="Tout télécharger"
                     foldersByType
+                    responsiveLabel
                     className="bg-gray-700 text-white hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100"
                   />
                 }
