@@ -14,9 +14,9 @@ interface Props {
 
 export default function Toolbar({ count, view, onView, leadingAction }: Props) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm text-gray-600 dark:text-gray-300" aria-live="polite">
+    <div className="flex flex-row items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+        <p className="whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" aria-live="polite">
           <span className="font-semibold text-gray-900 dark:text-gray-100">{count}</span> document
           {count > 1 ? 's' : ''}
         </p>
@@ -24,7 +24,7 @@ export default function Toolbar({ count, view, onView, leadingAction }: Props) {
       </div>
 
       <div
-        className="inline-flex self-start overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700"
+        className="inline-flex shrink-0 self-start overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700"
         role="group"
         aria-label="Mode d'affichage"
       >
