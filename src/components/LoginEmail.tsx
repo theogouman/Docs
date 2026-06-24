@@ -216,7 +216,8 @@ export default function LoginEmail({ onSent }: Props) {
       )}
 
       <p className="mt-4 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
-        Seuls les emails autorisés peuvent accéder au dossier.
+        Accès réservé aux parties autorisées. Aucun mot de passe ni coordonnée bancaire ne vous sera
+        jamais demandé.
       </p>
     </form>
   )
