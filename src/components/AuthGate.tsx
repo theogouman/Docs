@@ -112,11 +112,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
       {/* Identité de l'exploitant : rassure les destinataires et atteste de la
           légitimité de l'espace (utile face aux faux positifs anti-phishing). */}
       <p className="max-w-md px-2 text-center text-xs leading-relaxed text-gray-400 dark:text-gray-500">
-        Espace documentaire privé — Vente SAS La Relève Hyères / Maley (SIREN 987 622 057).
-        <br />
-        Administré par Théo Gouman · theo@gouman.fr · Accès réservé aux parties autorisées.
-        <br />
-        Ce portail ne vous demandera jamais de mot de passe ni de coordonnées bancaires.
+        Administré par Théo Gouman · theo@gouman.fr · SAS La Relève Hyères (SIREN 987 622 057)
       </p>
     </div>
   )

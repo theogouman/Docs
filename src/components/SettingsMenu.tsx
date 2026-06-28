@@ -106,7 +106,7 @@ export default function SettingsMenu({ onOpenStakeholders }: Props) {
   const tabClass = 't-tab inline-flex items-center gap-1.5 text-sm font-medium'
 
   return (
-    <div ref={wrapRef} className="relative z-30 shrink-0">
+    <div ref={wrapRef} className="relative z-50 shrink-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -119,7 +119,7 @@ export default function SettingsMenu({ onOpenStakeholders }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-2 w-60 origin-top-right rounded-2xl border border-gray-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10">
+        <div className="absolute right-0 top-full z-50 mt-2 w-60 origin-top-right rounded-2xl border border-gray-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10">
           {me.email && (
             <>
               <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">

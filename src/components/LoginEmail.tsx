@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { ChevronLeft, LoaderCircle, Lock, Send } from 'lucide-react'
-import { requestCode } from '../lib/auth'
+import { useEffect, useState } from 'react'
+import { ChevronLeft, LoaderCircle, Lock, Mail, Send } from 'lucide-react'
+import { requestCode, searchUsers } from '../lib/auth'
 
 interface Props {
   onSent: (email: string) => void
@@ -21,6 +21,39 @@ export default function LoginEmail({ onSent }: Props) {
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<{ email: string; name: string }[]>([])
+
+  // Suggestion d'adresse à partir de 2 caractères (après le clic « Accéder »).
+  // Volontairement gardée derrière la saisie : invisible pour un robot, et on
+  // n'expose jamais toute la liste d'un coup.
+  useEffect(() => {
+    if (!started) return
+    const term = q.trim().toLowerCase()
+    if (term.length < 2) {
+      setSuggestions([])
+      return
+    }
+    let alive = true
+    const t = setTimeout(async () => {
+      const hits = await searchUsers(term)
+      if (!alive) return
+      const seen = new Set<string>()
+      const flat: { email: string; name: string }[] = []
+      for (const h of hits) {
+        for (const em of h.emails) {
+          const key = em.toLowerCase()
+          if (seen.has(key)) continue
+          seen.add(key)
+          flat.push({ email: em, name: h.name })
+        }
+      }
+      setSuggestions(flat.slice(0, 6))
+    }, 150)
+    return () => {
+      alive = false
+      clearTimeout(t)
+    }
+  }, [q, started])
 
   async function send(email: string) {
     if (busy || !email) return
@@ -112,6 +145,31 @@ export default function LoginEmail({ onSent }: Props) {
           error ? 'border-red-300 dark:border-red-500/60' : 'border-gray-300 dark:border-gray-700'
         }`}
       />
+
+      {suggestions.length > 0 && (
+        <ul className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+          {suggestions.map((sug) => (
+            <li key={sug.email} className="border-b border-gray-100 last:border-b-0 dark:border-gray-800">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => send(sug.email)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left transition hover:bg-gray-50 disabled:opacity-60 dark:hover:bg-gray-800"
+              >
+                <Mail className="h-4 w-4 shrink-0 text-gray-400" />
+                <span className="min-w-0 flex-1">
+                  {sug.name && (
+                    <span className="block truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {sug.name}
+                    </span>
+                  )}
+                  <span className="block truncate text-xs text-gray-500 dark:text-gray-400">{sug.email}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <button
         type="submit"

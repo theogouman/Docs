@@ -280,8 +280,10 @@ body {
   height: 3rem;
 }
 .t-morph-filter[data-open='true'] {
-  width: 17rem;
-  height: 19rem;
+  /* Taille plafonnée à la fenêtre : le panneau reste toujours visible,
+     quelle que soit la largeur/hauteur d'écran. */
+  width: min(17rem, calc(100vw - 1.5rem));
+  height: min(19rem, 65svh);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -91,13 +91,15 @@ export default function CategoryFilter({ categories, selected, onToggle, onClear
                 >
                   <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{cat.name}</span>
-                  <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">{cat.count}</span>
                   <Check
                     className={`h-4 w-4 shrink-0 transition ${
                       isOn ? 'text-gray-900 opacity-100 dark:text-gray-100' : 'opacity-0'
                     }`}
                     aria-hidden="true"
                   />
+                  <span className="inline-flex h-5 min-w-[1.4rem] shrink-0 items-center justify-center rounded-md bg-white px-1.5 text-[11px] font-semibold tabular-nums text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-white/10">
+                    {cat.count}
+                  </span>
                 </button>
               )
             })}
