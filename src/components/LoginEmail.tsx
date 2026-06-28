@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
 import { ChevronLeft, LoaderCircle, Lock, Mail, Send } from 'lucide-react'
 import { requestCode, searchUsers } from '../lib/auth'
 
@@ -6,54 +6,68 @@ interface Props {
   onSent: (email: string) => void
 }
 
+interface Hit {
+  email: string
+  name: string
+}
+
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 /**
  * Accès en deux temps :
- *  1) une page d'accueil PUREMENT INFORMATIVE (aucun champ de saisie) — c'est
- *     ce que voit un robot non connecté, ce qui évite d'être classé comme
- *     « page de collecte d'identifiants » (faux positif Safe Browsing) ;
- *  2) après un clic explicite, un simple champ email (sans liste publique
- *     d'utilisateurs) pour recevoir le code.
+ *  1) page d'accueil PUREMENT INFORMATIVE (aucun champ) — ce que voit un robot,
+ *     ce qui évite le faux positif « collecte d'identifiants » ;
+ *  2) après un clic explicite, un champ email avec suggestions.
+ *
+ * Perf : la liste autorisée est préchargée UNE fois en arrière-plan dès l'entrée
+ * dans l'étape email, puis filtrée LOCALEMENT (résultat instantané, sans appel
+ * réseau à chaque frappe). Navigation clavier : ↑/↓ pour parcourir, Tab pour
+ * sélectionner, Entrée pour valider.
  */
 export default function LoginEmail({ onSent }: Props) {
   const [started, setStarted] = useState(false)
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [suggestions, setSuggestions] = useState<{ email: string; name: string }[]>([])
+  const [all, setAll] = useState<Hit[] | null>(null)
+  const [active, setActive] = useState(-1)
+  const [dismissed, setDismissed] = useState(false)
 
-  // Suggestion d'adresse à partir de 2 caractères (après le clic « Accéder »).
-  // Volontairement gardée derrière la saisie : invisible pour un robot, et on
-  // n'expose jamais toute la liste d'un coup.
+  // Préchargement unique de la liste autorisée (en tâche de fond, dès l'étape
+  // email — donc derrière le clic « Accéder », invisible pour un robot).
   useEffect(() => {
-    if (!started) return
-    const term = q.trim().toLowerCase()
-    if (term.length < 2) {
-      setSuggestions([])
-      return
-    }
+    if (!started || all) return
     let alive = true
-    const t = setTimeout(async () => {
-      const hits = await searchUsers(term)
-      if (!alive) return
-      const seen = new Set<string>()
-      const flat: { email: string; name: string }[] = []
-      for (const h of hits) {
-        for (const em of h.emails) {
-          const key = em.toLowerCase()
-          if (seen.has(key)) continue
-          seen.add(key)
-          flat.push({ email: em, name: h.name })
+    searchUsers('')
+      .then((hits) => {
+        if (!alive) return
+        const seen = new Set<string>()
+        const flat: Hit[] = []
+        for (const h of hits) {
+          for (const em of h.emails) {
+            const key = em.toLowerCase()
+            if (seen.has(key)) continue
+            seen.add(key)
+            flat.push({ email: em, name: h.name })
+          }
         }
-      }
-      setSuggestions(flat.slice(0, 6))
-    }, 150)
+        setAll(flat)
+      })
+      .catch(() => {})
     return () => {
       alive = false
-      clearTimeout(t)
     }
-  }, [q, started])
+  }, [started, all])
+
+  // Filtrage LOCAL instantané (à partir de 2 caractères).
+  const suggestions = useMemo<Hit[]>(() => {
+    if (dismissed) return []
+    const term = q.trim().toLowerCase()
+    if (term.length < 2 || !all) return []
+    return all
+      .filter((u) => u.email.toLowerCase().includes(term) || u.name.toLowerCase().includes(term))
+      .slice(0, 6)
+  }, [q, all, dismissed])
 
   async function send(email: string) {
     if (busy || !email) return
@@ -74,6 +88,35 @@ export default function LoginEmail({ onSent }: Props) {
 
   const typed = q.trim()
   const canSubmit = !busy && EMAIL_RE.test(typed)
+
+  function submit() {
+    if (busy) return
+    if (active >= 0 && suggestions[active]) send(suggestions[active].email)
+    else if (canSubmit) send(typed)
+  }
+
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'ArrowDown') {
+      if (!suggestions.length) return
+      e.preventDefault()
+      setActive((a) => (a < suggestions.length - 1 ? a + 1 : 0))
+    } else if (e.key === 'ArrowUp') {
+      if (!suggestions.length) return
+      e.preventDefault()
+      setActive((a) => (a > 0 ? a - 1 : suggestions.length - 1))
+    } else if (e.key === 'Tab' && !e.shiftKey && suggestions.length) {
+      // Tab : complète le champ avec la suggestion (active, sinon la première).
+      // Entrée validera ensuite l'envoi.
+      e.preventDefault()
+      const idx = active < 0 ? 0 : active
+      setQ(suggestions[idx].email)
+      setActive(-1)
+      setDismissed(true)
+    } else if (e.key === 'Escape') {
+      setActive(-1)
+      setDismissed(true)
+    }
+  }
 
   // ---- 1) Page d'accueil informative (aucun formulaire) ----
   if (!started) {
@@ -104,12 +147,12 @@ export default function LoginEmail({ onSent }: Props) {
     )
   }
 
-  // ---- 2) Étape email (après clic explicite) : champ simple, sans liste ----
+  // ---- 2) Étape email : champ + suggestions (filtrage local instantané) ----
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        if (canSubmit) send(typed)
+        submit()
       }}
       className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
@@ -134,10 +177,16 @@ export default function LoginEmail({ onSent }: Props) {
       <input
         type="email"
         autoFocus
+        role="combobox"
+        aria-expanded={suggestions.length > 0}
+        aria-autocomplete="list"
         value={q}
+        onKeyDown={onKeyDown}
         onChange={(e) => {
           setQ(e.target.value)
           setError(null)
+          setActive(-1)
+          setDismissed(false)
         }}
         placeholder="vous@exemple.com"
         aria-label="Adresse email"
@@ -147,14 +196,24 @@ export default function LoginEmail({ onSent }: Props) {
       />
 
       {suggestions.length > 0 && (
-        <ul className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-          {suggestions.map((sug) => (
+        <ul
+          role="listbox"
+          className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800"
+        >
+          {suggestions.map((sug, i) => (
             <li key={sug.email} className="border-b border-gray-100 last:border-b-0 dark:border-gray-800">
               <button
                 type="button"
+                role="option"
+                aria-selected={i === active}
                 disabled={busy}
+                onMouseEnter={() => setActive(i)}
                 onClick={() => send(sug.email)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left transition hover:bg-gray-50 disabled:opacity-60 dark:hover:bg-gray-800"
+                className={`flex w-full items-center gap-2 px-3 py-2 text-left transition disabled:opacity-60 ${
+                  i === active
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                }`}
               >
                 <Mail className="h-4 w-4 shrink-0 text-gray-400" />
                 <span className="min-w-0 flex-1">
@@ -173,9 +232,9 @@ export default function LoginEmail({ onSent }: Props) {
 
       <button
         type="submit"
-        disabled={!canSubmit}
+        disabled={!canSubmit && active < 0}
         className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
-          canSubmit
+          canSubmit || active >= 0
             ? 'bg-gray-700 text-white hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100'
             : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
         }`}
