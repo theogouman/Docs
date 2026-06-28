@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, LoaderCircle, Mail, Send } from 'lucide-react'
-import { requestCode, searchUsers, type UserHit } from '../lib/auth'
+import { useState } from 'react'
+import { ChevronLeft, LoaderCircle, Lock, Send } from 'lucide-react'
+import { requestCode } from '../lib/auth'
 
 interface Props {
   onSent: (email: string) => void
@@ -8,30 +8,19 @@ interface Props {
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
+/**
+ * Accès en deux temps :
+ *  1) une page d'accueil PUREMENT INFORMATIVE (aucun champ de saisie) — c'est
+ *     ce que voit un robot non connecté, ce qui évite d'être classé comme
+ *     « page de collecte d'identifiants » (faux positif Safe Browsing) ;
+ *  2) après un clic explicite, un simple champ email (sans liste publique
+ *     d'utilisateurs) pour recevoir le code.
+ */
 export default function LoginEmail({ onSent }: Props) {
+  const [started, setStarted] = useState(false)
   const [q, setQ] = useState('')
-  const [open, setOpen] = useState(false)
-  const [all, setAll] = useState<UserHit[]>([])
-  const [loaded, setLoaded] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [choosing, setChoosing] = useState<UserHit | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  // La liste n'est chargée qu'au premier focus (rien ne charge au démarrage).
-  async function ensureLoaded() {
-    if (loaded || loading) return
-    setLoading(true)
-    const r = await searchUsers('')
-    setAll(r)
-    setLoaded(true)
-    setLoading(false)
-  }
-  function reveal() {
-    setOpen(true)
-    ensureLoaded()
-  }
 
   async function send(email: string) {
     if (busy || !email) return
@@ -43,158 +32,86 @@ export default function LoginEmail({ onSent }: Props) {
       onSent(email)
       return
     }
-    if (r.error === 'unauthorized') setError("Cet email n'a pas accès à la dataroom.")
+    if (r.error === 'unauthorized') setError("Cet email n'a pas accès à l'espace.")
     else if (r.error === 'cooldown') setError(`Patientez ${r.retryIn ?? 20}s avant de redemander un code.`)
     else if (r.error === 'send_failed') setError("Impossible d'envoyer l'email. Réessayez plus tard.")
-    else if (r.error === 'notion') setError("Connexion à Notion impossible (intégration partagée ?).")
+    else if (r.error === 'notion') setError('Service momentanément indisponible. Réessayez.')
     else setError('Une erreur est survenue.')
   }
 
-  // Sélection d'une personne : si plusieurs adresses -> étape de choix.
-  function pick(p: UserHit) {
-    if (p.emails.length <= 1) send(p.emails[0])
-    else {
-      setChoosing(p)
-      setOpen(false)
-    }
-  }
-
   const typed = q.trim()
-  const typedValid = EMAIL_RE.test(typed)
-  const s = typed.toLowerCase()
-  const filtered = s
-    ? all.filter((p) => p.name.toLowerCase().includes(s) || p.emails.some((e) => e.toLowerCase().includes(s)))
-    : all
-  const canSubmit = !busy && (typedValid || filtered.length === 1)
+  const canSubmit = !busy && EMAIL_RE.test(typed)
 
-  // ---- Étape de confirmation : choisir l'adresse de réception du code ----
-  if (choosing) {
+  // ---- 1) Page d'accueil informative (aucun formulaire) ----
+  if (!started) {
     return (
       <div className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-300">
+          <Lock className="h-5 w-5" />
+        </span>
+        <h1 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Espace documentaire privé
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          Documents de la vente immobilière de la SAS La Relève Hyères. L'accès est strictement
+          réservé aux parties autorisées (notaire, associés, acquéreur), sur invitation.
+        </p>
         <button
           type="button"
-          onClick={() => {
-            setChoosing(null)
-            setError(null)
-          }}
-          className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-gray-500 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          onClick={() => setStarted(true)}
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gray-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-600 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-100"
         >
-          <ChevronLeft className="h-4 w-4" />
-          Retour
+          Accéder à mon espace
         </button>
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          À quelle adresse dois-je envoyer le code ?
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {choosing.emails.length} adresses mails sont enregistrées
+        <p className="mt-4 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+          Portail privé. Aucun mot de passe, paiement ou coordonnée bancaire ne vous sera jamais
+          demandé.
         </p>
-
-        <ul className="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-          {choosing.emails.map((em, i) => (
-            <li key={em} className={i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => send(em)}
-                className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left transition hover:bg-gray-50 disabled:opacity-60 dark:hover:bg-gray-800"
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <Mail className="h-4 w-4 shrink-0 text-gray-400" />
-                  <span className="truncate text-sm text-gray-800 dark:text-gray-100">{em}</span>
-                </span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        {busy && (
-          <p className="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-            Envoi du code…
-          </p>
-        )}
-        {error && (
-          <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        )}
       </div>
     )
   }
 
-  // ---- Écran principal : un seul bloc champ + liste révélée au focus ----
+  // ---- 2) Étape email (après clic explicite) : champ simple, sans liste ----
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        if (typedValid) send(typed)
-        else if (filtered.length === 1) pick(filtered[0])
+        if (canSubmit) send(typed)
       }}
       className="w-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
-      <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Qui se connecte à la dataroom ?</h1>
+      <button
+        type="button"
+        onClick={() => {
+          setStarted(false)
+          setError(null)
+        }}
+        className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-gray-500 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Retour
+      </button>
+      <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        Recevoir mon code de connexion
+      </h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Saisissez votre adresse email pour recevoir votre code de connexion
+        Saisissez l'adresse email à laquelle vous avez été invité.
       </p>
 
-      {/* Bloc unifié : le champ et la liste partagent la même bordure. */}
-      <div
-        className={`mt-5 overflow-hidden rounded-xl border bg-white transition-colors dark:bg-gray-800 ${
+      <input
+        type="email"
+        autoFocus
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value)
+          setError(null)
+        }}
+        placeholder="vous@exemple.com"
+        aria-label="Adresse email"
+        className={`mt-5 w-full rounded-xl border bg-white px-4 py-2.5 text-base text-gray-900 outline-none transition focus:border-gray-400 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:text-sm ${
           error ? 'border-red-300 dark:border-red-500/60' : 'border-gray-300 dark:border-gray-700'
         }`}
-      >
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-          <input
-            ref={inputRef}
-            type="email"
-            value={q}
-            onFocus={reveal}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setError(null)
-              if (!open) reveal()
-            }}
-            placeholder="vous@exemple.com"
-            aria-label="Adresse email"
-            className="w-full bg-transparent py-2.5 pl-10 pr-3 text-base text-gray-900 outline-none dark:text-gray-100 dark:placeholder:text-gray-500 sm:text-sm"
-          />
-        </div>
-
-        {/* Redimensionnement animé : la liste se déplie sous le champ. */}
-        <div
-          className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-            open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-          }`}
-        >
-          <div className="overflow-hidden">
-            <ul className="max-h-[40svh] divide-y divide-gray-100 overflow-y-auto border-t border-gray-100 dark:divide-gray-700/60 dark:border-gray-700/60 sm:max-h-64">
-              {loading && <li className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">Chargement…</li>}
-              {!loading && filtered.length === 0 && (
-                <li className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500">Aucun utilisateur trouvé</li>
-              )}
-              {filtered.map((p) => (
-                <li key={p.emails.join('|')}>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => pick(p)}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left transition hover:bg-gray-50 disabled:opacity-60 dark:hover:bg-gray-700/50"
-                  >
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-100">
-                      {p.name || p.emails[0]}
-                    </span>
-                    <span className="max-w-[50%] shrink-0 truncate text-xs text-gray-400 dark:text-gray-500">
-                      {p.emails.length > 1 ? `${p.emails.length} adresses` : p.name ? p.emails[0] : ''}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+      />
 
       <button
         type="submit"
@@ -216,8 +133,7 @@ export default function LoginEmail({ onSent }: Props) {
       )}
 
       <p className="mt-4 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
-        Accès réservé aux parties autorisées. Aucun mot de passe ni coordonnée bancaire ne vous sera
-        jamais demandé.
+        Aucun mot de passe ni coordonnée bancaire ne vous sera jamais demandé.
       </p>
     </form>
   )
