@@ -14,42 +14,9 @@
 
 export const config = { maxDuration: 60 }
 
-import crypto from 'crypto'
-
 const SPACE_ID = '044d7f69-a713-4bfa-a4e4-53a306821dcf'
 const NOTION_VERSION = '2022-06-28'
 const CACHE_TTL_MS = 45 * 60 * 1000
-
-// ---- Auth (inliné : aucun import local pour un bundling ESM fiable) ----
-const AUTH_SECRET = process.env.AUTH_SECRET || ''
-function authConfigured(): boolean {
-  return Boolean(process.env.NOTION_TOKEN && process.env.AUTH_SECRET)
-}
-function sessionEmail(req: any): string | null {
-  if (!AUTH_SECRET) return null
-  const header: string = req?.headers?.cookie || ''
-  let token = ''
-  for (const part of header.split(';')) {
-    const idx = part.indexOf('=')
-    if (idx > 0 && part.slice(0, idx).trim() === 'session') token = decodeURIComponent(part.slice(idx + 1).trim())
-  }
-  if (!token) return null
-  const i = token.lastIndexOf('.')
-  if (i < 0) return null
-  const body = token.slice(0, i)
-  const mac = token.slice(i + 1)
-  const expected = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url')
-  const ab = Buffer.from(mac)
-  const bb = Buffer.from(expected)
-  if (ab.length !== bb.length || !crypto.timingSafeEqual(ab, bb)) return null
-  try {
-    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'))
-    if (payload?.exp && Date.now() > payload.exp) return null
-    return payload?.email ?? null
-  } catch {
-    return null
-  }
-}
 
 type Json = any
 
@@ -154,10 +121,6 @@ export default async function handler(req: Json, res: Json) {
     const rawId = Array.isArray(q.id) ? q.id[0] : q.id
     if (!rawId) return sendError(res, 400, 'Identifiant de document manquant.')
 
-    // Accès aux PDF réservé aux utilisateurs connectés (si l'auth est active).
-    const locked = authConfigured()
-    if (locked && !sessionEmail(req)) return sendError(res, 401, 'Authentification requise.')
-
     const url = await resolveSigned(rawId)
     if (!url) return sendError(res, 502, 'PDF introuvable sur Notion (page publique ?).')
 
@@ -168,8 +131,7 @@ export default async function handler(req: Json, res: Json) {
     if (!proxy && !download) {
       res.statusCode = 302
       res.setHeader('Location', url)
-      // Ressource privée si l'auth est active -> pas de cache CDN partagé.
-      res.setHeader('Cache-Control', locked ? 'private, no-store' : 'public, max-age=0, s-maxage=1800')
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=1800')
       res.setHeader('X-Robots-Tag', 'noindex, nofollow')
       res.end()
       return

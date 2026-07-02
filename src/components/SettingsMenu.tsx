@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { LogOut, Moon, Settings, Sun, Users } from 'lucide-react'
-import { fetchMe, logout } from '../lib/auth'
+import { Moon, Settings, Sun, Users } from 'lucide-react'
 
 interface Props {
   /** Ouvre le modal des parties prenantes (entrée affichée sur mobile uniquement). */
@@ -15,29 +14,16 @@ function currentTheme(): Theme {
 }
 
 /**
- * Molette de réglages : ouvre un panneau où l'on choisit l'apparence
- * (onglets glissants « Clair / Sombre », style transitions.dev) et où l'on
- * peut se déconnecter. Remplace l'ancien simple bouton jour/nuit.
+ * Molette de réglages : panneau de choix de l'apparence (onglets glissants
+ * « Clair / Sombre », style transitions.dev) ; regroupe aussi, sur mobile,
+ * l'accès aux parties prenantes.
  */
 export default function SettingsMenu({ onOpenStakeholders }: Props) {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(currentTheme)
-  const [busy, setBusy] = useState(false)
-  const [me, setMe] = useState<{ email?: string; name?: string }>({})
   const wrapRef = useRef<HTMLDivElement>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLSpanElement>(null)
-
-  // Identité de la session (pour « connecté en tant que … »).
-  useEffect(() => {
-    let alive = true
-    fetchMe().then((r) => {
-      if (alive && r.email) setMe({ email: r.email, name: r.name })
-    })
-    return () => {
-      alive = false
-    }
-  }, [])
 
   // Applique le thème et le mémorise.
   useEffect(() => {
@@ -96,13 +82,6 @@ export default function SettingsMenu({ onOpenStakeholders }: Props) {
     if (open) movePill(true)
   }, [theme, open])
 
-  async function handleLogout() {
-    if (busy) return
-    setBusy(true)
-    await logout()
-    window.location.reload()
-  }
-
   const tabClass = 't-tab inline-flex items-center gap-1.5 text-sm font-medium'
 
   return (
@@ -120,25 +99,6 @@ export default function SettingsMenu({ onOpenStakeholders }: Props) {
 
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-60 origin-top-right rounded-2xl border border-gray-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10">
-          {me.email && (
-            <>
-              <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                Vous êtes connecté en tant que{' '}
-                <span className="t-tt-wrap">
-                  <button
-                    type="button"
-                    className="t-tt-trigger cursor-default font-semibold text-gray-900 underline decoration-dotted underline-offset-2 dark:text-gray-100"
-                  >
-                    {me.name || me.email}
-                  </button>
-                  <span className="t-tt" role="tooltip">
-                    {me.email}
-                  </span>
-                </span>
-              </p>
-              <div className="mb-3 border-t border-gray-100 dark:border-gray-800" />
-            </>
-          )}
           {/* Sur mobile, le bouton « parties prenantes » est regroupé ici. */}
           <div className="mb-3 sm:hidden">
             <button
@@ -182,18 +142,6 @@ export default function SettingsMenu({ onOpenStakeholders }: Props) {
               Sombre
             </button>
           </div>
-
-          <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={busy}
-            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
-          >
-            <LogOut className="h-4 w-4" />
-            Se déconnecter
-          </button>
         </div>
       )}
     </div>

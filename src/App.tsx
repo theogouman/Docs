@@ -5,7 +5,6 @@ import type { Category, DocItem, NotionColor, ViewMode } from './lib/types'
 import { TypeColorContext } from './lib/categories'
 import { normalize } from './lib/format'
 import { logAction } from './lib/log'
-import AuthGate from './components/AuthGate'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import CategoryFilter from './components/CategoryFilter'
@@ -181,9 +180,8 @@ export default function App() {
   }
 
   return (
-    <AuthGate>
-      <TypeColorContext.Provider value={colorFor}>
-        <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
+    <TypeColorContext.Provider value={colorFor}>
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
           <Header onOpenStakeholders={() => setStakeholdersOpen(true)} />
 
           <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -284,8 +282,7 @@ export default function App() {
 
           <DetailPanel doc={detail} onClose={() => setDetail(null)} />
           <StakeholdersModal open={stakeholdersOpen} onClose={() => setStakeholdersOpen(false)} />
-        </div>
-      </TypeColorContext.Provider>
-    </AuthGate>
+      </div>
+    </TypeColorContext.Provider>
   )
 }
