@@ -19,3 +19,9 @@ export function pdfDownloadUrl(doc: Pick<DocItem, 'notionId' | 'file'>): string 
 export function pdfProxyUrl(doc: Pick<DocItem, 'notionId'>): string {
   return `${pdfUrl(doc)}?proxy=1`
 }
+
+/** Lien unique et partageable d'un document (ouvre directement son aperçu). */
+export function docShareUrl(doc: Pick<DocItem, 'id'>): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  return `${origin}${BASE}?doc=${encodeURIComponent(doc.id)}`
+}

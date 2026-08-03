@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import rawDocuments from './data/documents.json'
 import rawCategories from './data/categories.json'
 import type { Category, DocItem, NotionColor, ViewMode } from './lib/types'
@@ -173,10 +173,59 @@ export default function App() {
     })
   }
 
+  // ---- Lien unique par document (?doc=<id>) ------------------------------
+  // Chaque document a sa propre URL : l'ouvrir mémorise le lien (partageable,
+  // bouton retour = fermer), et ouvrir le lien affiche directement le document.
+  const docsRef = useRef<DocItem[]>(docs)
+  docsRef.current = docs
+  const openedFromUrl = useRef(false)
+
+  function findByParam(id: string | null): DocItem | undefined {
+    if (!id) return undefined
+    return docsRef.current.find((d) => d.id === id || d.notionId === id)
+  }
+
+  // Ouverture initiale via l'URL (réessaie tant que la liste live se charge).
+  useEffect(() => {
+    if (openedFromUrl.current) return
+    const id = new URLSearchParams(window.location.search).get('doc')
+    if (!id) {
+      openedFromUrl.current = true
+      return
+    }
+    const found = findByParam(id)
+    if (found) {
+      setDetail(found)
+      openedFromUrl.current = true
+    }
+  }, [docs])
+
+  // Bouton précédent/suivant du navigateur -> synchronise le document affiché.
+  useEffect(() => {
+    function onPop() {
+      const id = new URLSearchParams(window.location.search).get('doc')
+      setDetail(findByParam(id) ?? null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  function setDocParam(id: string | null) {
+    const u = new URL(window.location.href)
+    if (id) u.searchParams.set('doc', id)
+    else u.searchParams.delete('doc')
+    window.history.pushState({}, '', u)
+  }
+
   // Ouvrir le détail = consulter le document -> on journalise une « Ouverture ».
   function openDetail(doc: DocItem) {
     logAction('Ouverture', doc.name)
     setDetail(doc)
+    setDocParam(doc.id)
+  }
+  function closeDetail() {
+    setDetail(null)
+    setDocParam(null)
   }
 
   return (
@@ -280,7 +329,7 @@ export default function App() {
             </footer>
           </main>
 
-          <DetailPanel doc={detail} onClose={() => setDetail(null)} />
+          <DetailPanel doc={detail} onClose={closeDetail} />
           <StakeholdersModal open={stakeholdersOpen} onClose={() => setStakeholdersOpen(false)} />
       </div>
     </TypeColorContext.Provider>

@@ -1,6 +1,7 @@
-import { Download, ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Download, ExternalLink, Link2 } from 'lucide-react'
 import type { DocItem } from '../lib/types'
-import { pdfUrl, pdfDownloadUrl } from '../lib/pdf'
+import { pdfUrl, pdfDownloadUrl, docShareUrl } from '../lib/pdf'
 import { logAction } from '../lib/log'
 
 interface Props {
@@ -13,12 +14,14 @@ interface Props {
 }
 
 /**
- * Boutons « Ouvrir » (nouvel onglet) et « Télécharger ».
+ * Actions d'un document : « Ouvrir » (nouvel onglet), « Télécharger » et
+ * « Copier le lien » (lien unique et partageable du document).
  * Le PDF n'est résolu/chargé qu'au clic (aucun préchargement).
  */
 export default function DocActions({ doc, size = 'sm', variant = 'default', showOpen = true }: Props) {
   const url = pdfUrl(doc)
   const dl = pdfDownloadUrl(doc)
+  const [copied, setCopied] = useState(false)
 
   const onOpen = (e: { stopPropagation: () => void }) => {
     e.stopPropagation()
@@ -28,8 +31,21 @@ export default function DocActions({ doc, size = 'sm', variant = 'default', show
     e.stopPropagation()
     logAction('Téléchargement', doc.name)
   }
+  async function onCopy(e: { preventDefault: () => void; stopPropagation: () => void }) {
+    e.preventDefault()
+    e.stopPropagation()
+    try {
+      await navigator.clipboard.writeText(docShareUrl(doc))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      /* presse-papier indisponible : on ignore */
+    }
+  }
 
   if (variant === 'compact') {
+    const iconBtn =
+      'inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white'
     return (
       <div className="flex items-center gap-1">
         <a
@@ -39,7 +55,7 @@ export default function DocActions({ doc, size = 'sm', variant = 'default', show
           onClick={onOpen}
           aria-label={`Ouvrir le PDF : ${doc.name}`}
           title="Ouvrir"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+          className={iconBtn}
         >
           <ExternalLink className="h-4 w-4" />
         </a>
@@ -48,15 +64,29 @@ export default function DocActions({ doc, size = 'sm', variant = 'default', show
           onClick={onDownload}
           aria-label={`Télécharger le PDF : ${doc.name}`}
           title="Télécharger"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+          className={iconBtn}
         >
           <Download className="h-4 w-4" />
         </a>
+        <button
+          type="button"
+          onClick={onCopy}
+          aria-label={`Copier le lien : ${doc.name}`}
+          title={copied ? 'Lien copié' : 'Copier le lien'}
+          className={iconBtn}
+        >
+          {copied ? (
+            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+          ) : (
+            <Link2 className="h-4 w-4" />
+          )}
+        </button>
       </div>
     )
   }
 
   const pad = size === 'md' ? 'px-3.5 py-2 text-sm' : 'px-3 py-1.5 text-xs'
+  const outline = `inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${pad}`
   return (
     <div className="flex flex-wrap items-center gap-2">
       {showOpen && (
@@ -76,11 +106,19 @@ export default function DocActions({ doc, size = 'sm', variant = 'default', show
         href={dl}
         onClick={onDownload}
         aria-label={`Télécharger le PDF : ${doc.name}`}
-        className={`inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${pad}`}
+        className={outline}
       >
         <Download className="h-4 w-4" />
         Télécharger
       </a>
+      <button type="button" onClick={onCopy} aria-label={`Copier le lien : ${doc.name}`} className={outline}>
+        {copied ? (
+          <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+        ) : (
+          <Link2 className="h-4 w-4" />
+        )}
+        {copied ? 'Lien copié' : 'Copier le lien'}
+      </button>
     </div>
   )
 }
