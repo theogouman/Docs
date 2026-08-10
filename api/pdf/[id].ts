@@ -18,6 +18,9 @@ const SPACE_ID = '044d7f69-a713-4bfa-a4e4-53a306821dcf'
 const NOTION_VERSION = '2022-06-28'
 const CACHE_TTL_MS = 45 * 60 * 1000
 
+// Dataroom fermée : plus aucun PDF servi. Repasser à false pour rouvrir.
+const CLOSED = true
+
 type Json = any
 
 // Cache mémoire des URL signées (persiste tant que l'instance reste chaude).
@@ -117,6 +120,7 @@ function sendError(res: Json, code: number, message: string) {
 
 export default async function handler(req: Json, res: Json) {
   try {
+    if (CLOSED) return sendError(res, 403, 'Accès restreint : la dataroom est fermée.')
     const q = req.query ?? {}
     const rawId = Array.isArray(q.id) ? q.id[0] : q.id
     if (!rawId) return sendError(res, 400, 'Identifiant de document manquant.')

@@ -13,6 +13,9 @@ const DATABASE_ID = '387bad05-6a95-80a6-85ec-d4981181fac0'
 const NOTION_VERSION = '2022-06-28'
 const CACHE_TTL_MS = 30 * 1000
 
+// Dataroom fermée : on ne renvoie plus la liste des documents.
+const CLOSED = true
+
 type Json = any
 
 let cache: { at: number; data: { documents: Json[] } } | null = null
@@ -83,6 +86,7 @@ function send(res: Json, code: number, obj: any, sMaxAge = 0) {
 
 export default async function handler(_req: Json, res: Json) {
   try {
+    if (CLOSED) return send(res, 200, { documents: [] }, 0)
     const now = Date.now()
     if (cache && now - cache.at < CACHE_TTL_MS) return send(res, 200, cache.data, 30)
 
